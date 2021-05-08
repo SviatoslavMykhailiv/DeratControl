@@ -7,9 +7,10 @@ namespace Infrastructure.Configurations {
     public override void Configure(EntityTypeBuilder<PointReview> builder) {
       base.Configure(builder);
 
-      builder.Property(c => c.PointReviewId).HasColumnName("PointReviewID");
       builder.Property(c => c.ErrandId).HasColumnName("ErrandFID");
       builder.Property(c => c.PointId).HasColumnName("PointFID");
+
+      builder.HasMany(p => p.Records).WithOne(r => r.PointReview).OnDelete(DeleteBehavior.Cascade);
     }
   }
 }

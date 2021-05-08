@@ -29,12 +29,6 @@ namespace Infrastructure.Migrations
                         .HasColumnName("UserFID")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid");
-
                     b.HasKey("FacilityId", "UserId");
 
                     b.HasIndex("UserId");
@@ -44,7 +38,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Errand", b =>
                 {
-                    b.Property<Guid>("ErrandId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("ErrandID")
                         .HasColumnType("uuid");
@@ -81,7 +75,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.HasKey("ErrandId");
+                    b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
 
@@ -92,12 +86,15 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Facility", b =>
                 {
-                    b.Property<Guid>("FacilityId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("FacilityID")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<string>("City")
                         .HasColumnType("text");
 
                     b.Property<string>("CompanyName")
@@ -115,14 +112,50 @@ namespace Infrastructure.Migrations
                     b.Property<string>("SecurityCode")
                         .HasColumnType("text");
 
-                    b.HasKey("FacilityId");
+                    b.HasKey("Id");
 
                     b.ToTable("Facility");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Field", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("FieldID")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FieldName")
+                        .HasColumnType("text");
+
+                    b.Property<int>("FieldType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("ModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("OptionList")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TrapId")
+                        .HasColumnName("TrapFID")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TrapId");
+
+                    b.ToTable("Field");
+                });
+
             modelBuilder.Entity("Domain.Entities.Perimeter", b =>
                 {
-                    b.Property<Guid>("PerimeterId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("PerimeterID")
                         .HasColumnType("uuid");
@@ -143,13 +176,10 @@ namespace Infrastructure.Migrations
                     b.Property<string>("PerimeterName")
                         .HasColumnType("text");
 
-                    b.Property<string>("SchemeImagePath")
-                        .HasColumnType("text");
-
                     b.Property<int>("TopLoc")
                         .HasColumnType("integer");
 
-                    b.HasKey("PerimeterId");
+                    b.HasKey("Id");
 
                     b.HasIndex("FacilityId");
 
@@ -158,7 +188,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Point", b =>
                 {
-                    b.Property<Guid>("PointId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("PointID")
                         .HasColumnType("uuid");
@@ -190,7 +220,7 @@ namespace Infrastructure.Migrations
                         .HasColumnName("TrapFID")
                         .HasColumnType("uuid");
 
-                    b.HasKey("PointId");
+                    b.HasKey("Id");
 
                     b.HasIndex("PerimeterId");
 
@@ -203,7 +233,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.PointReview", b =>
                 {
-                    b.Property<Guid>("PointReviewId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("PointReviewID")
                         .HasColumnType("uuid");
@@ -222,10 +252,13 @@ namespace Infrastructure.Migrations
                         .HasColumnName("PointFID")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Report")
+                        .HasColumnType("text");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.HasKey("PointReviewId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ErrandId");
 
@@ -236,9 +269,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.PointReviewRecord", b =>
                 {
-                    b.Property<Guid>("PointReviewRecordId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("PointReviewRecordID")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("FieldId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("ModifiedAt")
@@ -258,24 +294,21 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Value")
                         .HasColumnType("text");
 
-                    b.HasKey("PointReviewRecordId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("FieldId");
 
                     b.HasIndex("PointReviewId");
-
-                    b.HasIndex("SupplementFieldId");
 
                     b.ToTable("PointReviewRecord");
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplement", b =>
                 {
-                    b.Property<Guid>("SupplementId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("SupplementID")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("CertificatePath")
-                        .HasColumnType("text");
 
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("timestamp without time zone");
@@ -289,47 +322,14 @@ namespace Infrastructure.Migrations
                     b.Property<string>("SupplementName")
                         .HasColumnType("text");
 
-                    b.HasKey("SupplementId");
+                    b.HasKey("Id");
 
                     b.ToTable("Supplement");
                 });
 
-            modelBuilder.Entity("Domain.Entities.SupplementField", b =>
-                {
-                    b.Property<Guid>("SupplementFieldId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("SupplementFieldFID")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FieldName")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<Guid>("ModifiedBy")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SupplementFieldType")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SupplementId")
-                        .HasColumnName("SupplementFID")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("SupplementFieldId");
-
-                    b.HasIndex("SupplementId");
-
-                    b.ToTable("SupplementField");
-                });
-
             modelBuilder.Entity("Domain.Entities.Trap", b =>
                 {
-                    b.Property<Guid>("TrapId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnName("TrapID")
                         .HasColumnType("uuid");
@@ -346,7 +346,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("TrapName")
                         .HasColumnType("text");
 
-                    b.HasKey("TrapId");
+                    b.HasKey("Id");
 
                     b.ToTable("Trap");
                 });
@@ -399,7 +399,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<Guid?>("FacilityId")
-                        .HasColumnName("FacilityFID")
                         .HasColumnType("uuid");
 
                     b.Property<string>("FirstName")
@@ -455,7 +454,7 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex");
 
-                    b.ToTable("ApplicationUser");
+                    b.ToTable("AspNetUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -589,6 +588,15 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Entities.Field", b =>
+                {
+                    b.HasOne("Domain.Entities.Trap", "Trap")
+                        .WithMany("Fields")
+                        .HasForeignKey("TrapId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Entities.Perimeter", b =>
                 {
                     b.HasOne("Domain.Entities.Facility", "Facility")
@@ -622,7 +630,7 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.PointReview", b =>
                 {
                     b.HasOne("Domain.Entities.Errand", "Errand")
-                        .WithMany("Reviews")
+                        .WithMany("Points")
                         .HasForeignKey("ErrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -636,24 +644,13 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.PointReviewRecord", b =>
                 {
+                    b.HasOne("Domain.Entities.Field", "Field")
+                        .WithMany()
+                        .HasForeignKey("FieldId");
+
                     b.HasOne("Domain.Entities.PointReview", "PointReview")
                         .WithMany("Records")
                         .HasForeignKey("PointReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.SupplementField", "SupplementField")
-                        .WithMany()
-                        .HasForeignKey("SupplementFieldId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.SupplementField", b =>
-                {
-                    b.HasOne("Domain.Entities.Supplement", "Supplement")
-                        .WithMany("Fields")
-                        .HasForeignKey("SupplementId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

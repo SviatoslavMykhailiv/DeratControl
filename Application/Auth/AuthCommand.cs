@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Application.Auth {
   public class AuthCommand : IRequest<AuthResponse> {
-    public string UserName { get; set; }
-    public string Password { get; set; }
+    public string UserName { get; init; }
+    public string Password { get; init; }
 
     public class AuthCommandHandler : IRequestHandler<AuthCommand, AuthResponse> {
       private readonly IAuthService authService;
@@ -17,7 +17,7 @@ namespace Application.Auth {
 
       public async Task<AuthResponse> Handle(AuthCommand request, CancellationToken cancellationToken) {
         var token = await authService.SignIn(request.UserName, request.Password);
-        return new AuthResponse { Token = token  };
+        return new AuthResponse(token);
       }
     }
   }

@@ -21,7 +21,7 @@ namespace Application.Perimeters.Commands.UpsertPerimeter {
     public byte[] SchemeImage { get; set; }
     public int LeftLoc { get; set; }
     public int TopLoc { get; set; }
-    public ICollection<PointDto> Points { get; set; }
+    public ICollection<PointDto> Points { get; set; } = new List<PointDto>();
 
     public class UpsertPerimeterCommandHandler : IRequestHandler<UpsertPerimeterCommand, Guid> {
       private readonly IDeratControlDbContext context;
@@ -39,44 +39,48 @@ namespace Application.Perimeters.Commands.UpsertPerimeter {
           perimeter = await context
             .Perimeters
             .Include(p => p.Points)
-            .FirstOrDefaultAsync(p => p.PerimeterId == request.PerimeterId);
+            .FirstOrDefaultAsync(p => p.Id == request.PerimeterId, cancellationToken: cancellationToken);
         }
         else {
-          perimeter = new Perimeter();
+          perimeter = new Perimeter { Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException() };
           context.Perimeters.Add(perimeter);
         }
 
         var supplements = await GetSupplements();
         var traps = await GetTraps();
 
-        perimeter.Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException();
         perimeter.LeftLoc = request.LeftLoc;
         perimeter.TopLoc = request.TopLoc;
         perimeter.PerimeterName = request.PerimeterName;
-        perimeter.SchemeImagePath = Guid.NewGuid().ToString();
-        perimeter.UpdatePoints(ToPoints(request.Points, supplements, traps));
+
+        var inputPointList = request.Points.Where(p => p.PointId.HasValue).ToDictionary(p => p.PointId);
+
+        foreach(var point in perimeter.Points.ToList()) {
+          if (inputPointList.ContainsKey(point.Id)) 
+            continue;
+
+          perimeter.RemovePoint(point.Id);
+        }
+
+        foreach (var point in request.Points)
+          perimeter.SetPoint(
+            point.PointId, 
+            point.Order, 
+            point.LeftLoc, 
+            point.TopLoc, 
+            traps[point.TrapId], 
+            supplements[point.SupplementId]);
 
         await context.SaveChangesAsync(cancellationToken);
-        await fileStorage.SavePerimeterScheme(perimeter.SchemeImagePath, request.SchemeImage);
+        //await fileStorage.SaveFile(perimeter.SchemeImagePath, request.SchemeImage);
 
-        return perimeter.PerimeterId;
+        return perimeter.Id;
       }
 
-      private Task<Dictionary<Guid, Trap>> GetTraps() => context.Traps.ToDictionaryAsync(s => s.TrapId);
-      private Task<Dictionary<Guid, Supplement>> GetSupplements() => context.Supplements.ToDictionaryAsync(s => s.SupplementId);
+      private Task<Dictionary<Guid, Trap>> GetTraps() => context.Traps.ToDictionaryAsync(s => s.Id);
+      private Task<Dictionary<Guid, Supplement>> GetSupplements() => context.Supplements.ToDictionaryAsync(s => s.Id);
       private ValueTask<Facility> GetFacility(Guid facilityId, CancellationToken cancellationToken) =>
         context.Facilities.FindAsync(new object[] { facilityId }, cancellationToken);
-
-      private List<Point> ToPoints(
-        IEnumerable<PointDto> points,
-        Dictionary<Guid, Supplement> supplements,
-        Dictionary<Guid, Trap> traps) => points.Select(p => new Point {
-          Order = p.Order,
-          LeftLoc = p.LeftLoc,
-          TopLoc = p.TopLoc,
-          Trap = traps[p.TrapId],
-          Supplement = supplements[p.SupplementId]
-        }).ToList();
     }
   }
 }

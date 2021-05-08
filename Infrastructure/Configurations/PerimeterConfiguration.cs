@@ -8,7 +8,8 @@ namespace Infrastructure.Configurations {
       base.Configure(builder);
 
       builder.Property(c => c.FacilityId).HasColumnName("FacilityFID");
-      builder.Property(c => c.PerimeterId).HasColumnName("PerimeterID");
+
+      builder.HasMany(p => p.Points).WithOne(p => p.Perimeter).OnDelete(DeleteBehavior.Cascade);
     }
   }
 }

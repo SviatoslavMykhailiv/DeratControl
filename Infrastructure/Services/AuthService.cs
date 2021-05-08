@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -6,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,7 @@ namespace Infrastructure.Services {
     public const string USER_ID_CLAIM = "derat-user-id";
     public const string USER_ROLE_CLAIM = "derat-user-role";
     public const string USER_NAME_CLAIM = "derat-user-name";
+    public const string FACILITY_ID_CLAIM = "derat-facility-id";
 
     private readonly UserManager<ApplicationUser> userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
@@ -29,7 +32,7 @@ namespace Infrastructure.Services {
 
     public AuthService(
       UserManager<ApplicationUser> userManager, 
-      SignInManager<ApplicationUser> signInManager, 
+      SignInManager<ApplicationUser> signInManager,
       IOptions<AuthOptions> options) {
       this.userManager = userManager;
       this.signInManager = signInManager;
@@ -40,13 +43,18 @@ namespace Infrastructure.Services {
       var result = await signInManager.PasswordSignInAsync(userName, password, false, false);
 
       if (result.Succeeded == false)
-        return null;
+        throw new BadRequestException();
 
       var user = await userManager.FindByNameAsync(userName);
+      var userRole = await userManager.GetRolesAsync(user);
 
       var claims = new List<Claim> {
         new Claim(USER_ID_CLAIM, user.Id.ToString()),
+        new Claim(USER_ROLE_CLAIM, userRole.First()),
         new Claim(USER_NAME_CLAIM, userName) };
+
+      if (user.FacilityId.HasValue)
+        claims.Add(new Claim(FACILITY_ID_CLAIM, user.FacilityId.Value.ToString()));
 
       var now = DateTime.Now;
       var expires = DateTime.Now.Add(TimeSpan.FromHours(options.Value.LifeTime));

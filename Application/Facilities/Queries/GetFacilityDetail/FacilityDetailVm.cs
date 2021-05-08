@@ -6,16 +6,23 @@ using System.Collections.Generic;
 
 namespace Application.Facilities.Queries.GetFacilityDetail {
   public class FacilityDetailVm : IMapFrom<Facility> {
-    public Guid FacilityId { get; set; }
-    public string CompanyName { get; set; }
-    public string Name { get; set; }
-    public string SecurityCode { get; set; }
-    public string Address { get; set; }
-    public ICollection<PerimeterHeaderDto> Perimeters { get; set; }
-    public ICollection<UserHeaderDto> Users { get; set; }
+    public Guid FacilityId { get; init; }
+    public string CompanyName { get; private set; }
+    public string Name { get; init; }
+    public string City { get; init; }
+    public string SecurityCode { get; private set; }
+    public string Address { get; init; }
+    public ICollection<PerimeterHeaderDto> Perimeters { get; init; }
+    public ICollection<UserHeaderDto> Users { get; init; }
 
     public void Mapping(Profile profile) {
-      profile.CreateMap<Facility, FacilityDetailVm>();
+      profile.CreateMap<Facility, FacilityDetailVm>()
+        .ForMember(dest => dest.FacilityId, opt => opt.MapFrom(src => src.Id));
+    }
+
+    public void Obfuscate() {
+      CompanyName = string.Empty;
+      SecurityCode = string.Empty;
     }
   }
 }

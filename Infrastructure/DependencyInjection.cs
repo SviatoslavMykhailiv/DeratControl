@@ -40,6 +40,7 @@ namespace Infrastructure {
 
       services.AddScoped<IAuthService, AuthService>();
       services.AddScoped<IUserManagerService, UserManagerService>();
+      services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 
       services.AddOptions<AuthOptions>().Configure(c =>
       {
@@ -47,6 +48,8 @@ namespace Infrastructure {
         c.SecurityKey = configuration["Security:SecurityKey"];
         c.QrCodeSymmetricEncryptionKey = configuration["Security:QrCodeSymmetricEncryptionKey"];
       });
+
+      services.AddScoped<DataSeeder>();
 
       return services;
     }

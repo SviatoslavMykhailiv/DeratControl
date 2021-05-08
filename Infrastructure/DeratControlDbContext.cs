@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces;
+using Application.Common.Models;
 using Domain.Common;
 using Domain.Entities;
 using Infrastructure.Identity;
@@ -17,15 +18,14 @@ namespace Infrastructure {
         new DebugLoggerProvider()
     });
 
-    private readonly ICurrentUserService currentUserService;
     private readonly ICurrentDateService currentDateService;
 
     public DeratControlDbContext(
       DbContextOptions<DeratControlDbContext> options,
-      ICurrentUserService currentUserService,
-      ICurrentDateService currentDateService) : base(options) {
-      this.currentUserService = currentUserService;
+      ICurrentDateService currentDateService,
+      ICurrentUserProvider currentUserProvider) : base(options) {
       this.currentDateService = currentDateService;
+      User = currentUserProvider?.User;
     }
 
     public DbSet<Facility> Facilities { get; set; }
@@ -37,6 +37,8 @@ namespace Infrastructure {
     public DbSet<Trap> Traps { get; set; }
 
     public DbSet<Supplement> Supplements { get; set; }
+
+    public CurrentUser User { get; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
 
@@ -53,7 +55,7 @@ namespace Infrastructure {
         switch (entry.State) {
           case EntityState.Added:
           case EntityState.Modified:
-            entry.Entity.ModifiedBy = currentUserService.UserId;
+            entry.Entity.ModifiedBy = User.UserId;
             entry.Entity.ModifiedAt = currentDateService.CurrentDate;
             break;
         }

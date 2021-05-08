@@ -1,44 +1,69 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common.Dtos;
+using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Domain.Entities;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Services {
   public class UserManagerService : IUserManagerService {
+
+    private const string CUSTOMER = nameof(CUSTOMER);
+    private const string EMPLOYEE = nameof(EMPLOYEE);
+    private const string PROVIDER = nameof(PROVIDER);
+
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IDeratControlDbContext context;
 
-    public UserManagerService(UserManager<ApplicationUser> userManager, IDeratControlDbContext context) {
+    public UserManagerService(
+      UserManager<ApplicationUser> userManager, 
+      IDeratControlDbContext context) {
       this.userManager = userManager;
       this.context = context;
     }
 
-    public async Task<Guid> SaveUser(
-      string username,
-      string password,
-      string firstName,
-      string lastName,
-      string phoneNumber,
-      Guid? facilityId) {
+    public async Task<Guid> SaveUser(UserDto userModel, CancellationToken cancellationToken = default) {
 
-      var user = await userManager.FindByNameAsync(username);
+      var user = await userManager.FindByNameAsync(userModel.UserName);
 
       Facility facility = null;
 
-      if (facilityId.HasValue)
-        facility = await context.Facilities.FindAsync(facilityId.Value);
+      if (userModel.FacilityId.HasValue)
+        facility = await context.Facilities.FindAsync(new object[] { userModel.FacilityId.Value }, cancellationToken: cancellationToken);
+
+      var defaultFacilities = await context.Facilities.Where(f => userModel.Facilities.Contains(f.Id)).ToListAsync(cancellationToken: cancellationToken);
 
       if (user is null) {
-        user = new ApplicationUser { UserName = username, FirstName = firstName, LastName = lastName, PhoneNumber = phoneNumber, Facility = facility };
-        await userManager.CreateAsync(user, password);
+        user = new ApplicationUser {
+          UserName = userModel.UserName,
+          FirstName = userModel.FirstName,
+          LastName = userModel.LastName,
+          PhoneNumber = userModel.PhoneNumber,
+          Facility = facility,
+          Location = userModel.Location,
+          SecurityStamp = Guid.NewGuid().ToString(),
+          DefaultFacilities = defaultFacilities.Select(f => new DefaultFacility { Facility = f, User = user }).ToList()
+        };
+
+        var result = await userManager.CreateAsync(user, userModel.Password);
+
+        if (result.Succeeded == false)
+          throw new BadRequestException();
+
+        await userManager.AddToRoleAsync(user, userModel.Role);
       }
       else {
-        user.FirstName = firstName;
-        user.LastName = lastName;
-        user.PhoneNumber = phoneNumber;
+        user.FirstName = userModel.FirstName;
+        user.LastName = userModel.LastName;
+        user.PhoneNumber = userModel.PhoneNumber;
         user.Facility = facility;
+        user.Location = userModel.Location;
+        user.DefaultFacilities = defaultFacilities.Select(f => new DefaultFacility { Facility = f, User = user }).ToList();
 
         await userManager.UpdateAsync(user);
       }
@@ -46,17 +71,17 @@ namespace Infrastructure.Services {
       return user.Id;
     }
 
-    public async Task DeleteUser(Guid userId) {
-
-    }
-
-    public async Task<IUser> GetUser(Guid userId) {
+    public async Task DeleteUser(Guid userId, CancellationToken cancellationToken = default) {
       var user = await userManager.FindByIdAsync(userId.ToString());
 
       if (user is null)
-        return null;
+        return;
 
-      return user;
+      await userManager.DeleteAsync(user);
+    }
+
+    public async Task<IUser> GetUser(Guid userId, CancellationToken cancellationToken = default) {
+      return await userManager.FindByIdAsync(userId.ToString());
     }
   }
 }

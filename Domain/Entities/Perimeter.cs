@@ -5,44 +5,58 @@ using System.Linq;
 
 namespace Domain.Entities {
   public class Perimeter : AuditableEntity {
-    public Perimeter() {
-      Points = new HashSet<Point>();
-    }
 
-    public Guid PerimeterId { get; set; }
-    public Guid FacilityId { get; set; }
+    private readonly HashSet<Point> points = new HashSet<Point>();
+
+    public Guid FacilityId { get; init; }
 
     public int LeftLoc { get; set; }
     public int TopLoc { get; set; }
     public string PerimeterName { get; set; }
-    public string SchemeImagePath { get; set; }
-    public Facility Facility { get; set; }
-    public ICollection<Point> Points { get; private set; }
+    public Facility Facility { get; init; }
+    public IEnumerable<Point> Points => points;
 
-    public void UpdatePoints(IReadOnlyCollection<Point> points) {
-      var existingPoints = Points.ToDictionary(p => p.PointId);
+    public void SetPoint(Guid? pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement) {
+      if (pointId.HasValue)
+        UpdatePoint(pointId.Value, order, leftLoc, topLoc, trap, supplement);
+      else
+        AddPoint(order, leftLoc, topLoc, trap, supplement);
+    }
 
-      foreach (var point in Points.ToList()) {
-        if (points.Any(p => p.PointId == point.PointId))
-          continue;
+    public void RemovePoint(Guid pointId) {
+      points.RemoveWhere(p => p.Id == pointId);
+    }
 
-        Points.Remove(point);
-      }
+    private void AddPoint(int order, int leftLoc, int topLoc, Trap trap, Supplement supplement) {
+      if (points.Any(p => p.Order == order && p.Trap == trap))
+        throw new InvalidOperationException($"Point with order {order} already exists.");
 
-      foreach (var inputPoint in points) {
-        if (existingPoints.ContainsKey(inputPoint.PointId)) {
-          var point = existingPoints[inputPoint.PointId];
+      var point = new Point {
+        Perimeter = this,
+        Order = order,
+        LeftLoc = leftLoc,
+        TopLoc = topLoc,
+        Trap = trap,
+        Supplement = supplement
+      };
 
-          point.TopLoc = inputPoint.TopLoc;
-          point.LeftLoc = inputPoint.LeftLoc;
-          point.Order = inputPoint.Order;
-          point.Supplement = inputPoint.Supplement;
-          point.Trap = inputPoint.Trap;
-        }
-        else {
-          Points.Add(inputPoint);
-        }
-      }
+      points.Add(point);
+    }
+
+    private void UpdatePoint(Guid pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement) {
+      if (points.Any(p => p.Id != pointId && p.Order == order && p.Trap == trap))
+        throw new InvalidOperationException($"Point with order {order} already exists.");
+
+      var point = points.First(p => p.Id == pointId);
+
+      if (point is null)
+        return;
+
+      point.Order = order;
+      point.LeftLoc = leftLoc;
+      point.TopLoc = topLoc;
+      point.Trap = trap;
+      point.Supplement = supplement;
     }
   }
 }

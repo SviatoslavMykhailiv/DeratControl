@@ -14,7 +14,8 @@ namespace Application.Perimeters.Queries.GetPerimeterDetail {
     public ICollection<PointDto> Points { get; set; }
 
     public void Mapping(Profile profile) {
-      profile.CreateMap<Perimeter, PerimeterVm>();
+      profile.CreateMap<Perimeter, PerimeterVm>()
+        .ForMember(dest => dest.PerimeterId, opt => opt.MapFrom(src => src.Id));
     }
   }
 }

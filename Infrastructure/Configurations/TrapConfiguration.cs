@@ -7,7 +7,9 @@ namespace Infrastructure.Configurations {
     public override void Configure(EntityTypeBuilder<Trap> builder) {
       base.Configure(builder);
 
-      builder.Property(c => c.TrapId).HasColumnName("TrapID");
+      builder.HasMany(s => s.Fields)
+        .WithOne(f => f.Trap)
+        .OnDelete(DeleteBehavior.Cascade);
     }
   }
 }

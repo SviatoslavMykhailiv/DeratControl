@@ -7,7 +7,6 @@ namespace Infrastructure.Configurations {
     public override void Configure(EntityTypeBuilder<Point> builder) {
       base.Configure(builder);
 
-      builder.Property(c => c.PointId).HasColumnName("PointID");
       builder.Property(c => c.PerimeterId).HasColumnName("PerimeterFID");
       builder.Property(c => c.TrapId).HasColumnName("TrapFID");
       builder.Property(c => c.SupplementId).HasColumnName("SupplementFID");

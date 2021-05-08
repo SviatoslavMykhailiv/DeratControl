@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Configurations {
-  public class DefaultFacilityConfiguration : BaseEntityTypeConfiguration<DefaultFacility> {
-    public override void Configure(EntityTypeBuilder<DefaultFacility> builder) {
-      base.Configure(builder);
+  public class DefaultFacilityConfiguration : IEntityTypeConfiguration<DefaultFacility> {
+    public void Configure(EntityTypeBuilder<DefaultFacility> builder) {
 
+      builder.ToTable(typeof(DefaultFacility).Name);
       builder.HasKey(c => new { c.FacilityId, c.UserId });
 
       builder.Property(c => c.FacilityId).HasColumnName("FacilityFID");

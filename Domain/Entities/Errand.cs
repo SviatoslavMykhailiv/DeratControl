@@ -5,57 +5,137 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Domain.Entities {
+  /// <summary>
+  /// Represents an errand.
+  /// </summary>
   public class Errand : AuditableEntity {
+
+    private DateTime? completeDate;
+    private DateTime dueDate;
+    private DateTime originalDueDate;
+    private ErrandStatus status;
+    private string report;
+    private string description;
+
+    private readonly HashSet<PointReview> points = new HashSet<PointReview>();
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="Errand"/> with Planned status.
+    /// </summary>
     public Errand() {
-      Reviews = new HashSet<PointReview>();
+      Status = ErrandStatus.Planned;
     }
 
-    public Guid ErrandId { get; set; }
-    public Guid FacilityId { get; set; }
-    public Guid EmployeeId { get; set; }
+    public Guid FacilityId { get; init; }
+    public Guid EmployeeId { get; init; }
 
-    public DateTime OriginalDueDate { get; set; }
-    public DateTime DueDate { get; set; }
-    public DateTime? CompleteDate { get; set; }
-    public ErrandStatus Status { get; set; }
-    public string Description { get; set; }
-    public string Report { get; set; }
+    public DateTime OriginalDueDate {
+      get => originalDueDate;
+      private set {
+        AssertErrandNotFinished();
+        originalDueDate = value;
+      }
+    }
+
+    public DateTime DueDate {
+      get => dueDate;
+      private set {
+        AssertErrandNotFinished();
+        dueDate = value;
+      }
+    }
+
+    public DateTime? CompleteDate {
+      get => completeDate;
+      private set {
+        AssertErrandNotFinished();
+        completeDate = value;
+      }
+    }
+
+    public ErrandStatus Status {
+      get => status;
+      private set {
+        AssertErrandNotFinished();
+        status = value;
+      }
+    }
+
+    public string Description {
+      get => description;
+      set {
+        if (string.IsNullOrWhiteSpace(value))
+          throw new InvalidOperationException("Description cannot be empty.");
+
+        description = value;
+      }
+    }
+    
+    public string Report {
+      get => report;
+      set {
+        if (string.IsNullOrWhiteSpace(value))
+          throw new InvalidOperationException("Report cannot be empty.");
+
+        report = value;
+      }
+    }
 
     public Facility Facility { get; set; }
     public IUser Employee { get; set; }
-    public ICollection<PointReview> Reviews { get; private set; }
 
-    public void SetPointReview(IReadOnlyCollection<Guid> pointCollection, IDictionary<Guid, Supplement> supplements) {
-      var pointReviewDic = Reviews.ToDictionary(r => r.PointId);
-      var points = Facility.Perimeters.SelectMany(p => p.Points).ToDictionary(p => p.PointId);
+    public IEnumerable<PointReview> Points => points;
 
-      foreach(var review in Reviews.ToList()) {
-        if (pointCollection.Contains(review.PointId)) 
-          continue;
+    public bool IsOverdue(DateTime currentDate) => DueDate < currentDate;
 
-        Reviews.Remove(review);
-      }
+    public void SetDueDate(DateTime dueDate) {
+      AssertErrandNotFinished();
 
-      foreach(var point in pointCollection) {
-        if (pointReviewDic.ContainsKey(point)) 
-          continue;
+      DueDate = dueDate;
+      OriginalDueDate = dueDate;
+    }
 
-        var pointReview = new PointReview {
-          Errand = this,
-          Point = points[point],
-          Status = PointReviewStatus.NotReviewed
-        };
+    public void MoveDueDate(DateTime currentDate) {
 
-        foreach(var field in supplements[points[point].SupplementId].Fields) {
-          pointReview.Records.Add(new PointReviewRecord { 
-            PointReview = pointReview,
-            SupplementField = field,
-            Value = string.Empty
-          });
-        }
+      AssertErrandNotFinished();
 
-        Reviews.Add(pointReview);
+      DueDate = currentDate.AddDays(1);
+      Status = ErrandStatus.Overdue;
+    }
+
+    public void Complete(DateTime completeDate, string report) {
+      AssertErrandNotFinished();
+
+      CompleteDate = completeDate;
+      Report = report;
+      Status = ErrandStatus.Finished;
+    }
+
+    public void SetPointListForReview(IEnumerable<Guid> selectedPointList) {
+      AssertErrandNotFinished();
+
+      var existingPointList = points.ToDictionary(p => p.PointId);
+
+      var removePointList = (from pointId in selectedPointList
+                     where existingPointList.ContainsKey(pointId) == false
+                     select pointId)
+                     .ToHashSet();
+
+      points.RemoveWhere(p => removePointList.Contains(p.PointId));
+
+      var pointList = Facility.Perimeters.SelectMany(p => p.Points).ToDictionary(p => p.Id);
+
+      foreach(var pointId in selectedPointList) {
+        var pointReview = new PointReview(pointList[pointId]);
+        points.Add(pointReview);
       }
     }
+
+    private void AssertErrandNotFinished() {
+      if (status == ErrandStatus.Finished)
+        throw new InvalidOperationException("Errand is finished.");
+    }
+
+    public bool IsSecurityCodeValid(string securityCode) => string.Equals(securityCode, Facility.SecurityCode, StringComparison.OrdinalIgnoreCase);
   }
 }

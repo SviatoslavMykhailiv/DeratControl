@@ -1,8 +1,7 @@
-﻿using Domain.Common;
-using System;
+﻿using System;
 
 namespace Domain.Entities {
-  public class DefaultFacility : AuditableEntity {
+  public class DefaultFacility {
     public Guid FacilityId { get; set; }
     public Guid UserId { get; set; }
 

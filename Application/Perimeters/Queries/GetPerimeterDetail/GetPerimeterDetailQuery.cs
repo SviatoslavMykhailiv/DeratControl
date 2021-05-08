@@ -29,6 +29,7 @@ namespace Application.Perimeters.Queries.GetPerimeterDetail {
       public async Task<PerimeterVm> Handle(GetPerimeterDetailQuery request, CancellationToken cancellationToken) {
         var perimeter = await context
           .Perimeters
+          .AsNoTracking()
           .ProjectTo<PerimeterVm>(mapper.ConfigurationProvider)
           .FirstOrDefaultAsync(p => p.PerimeterId == request.PerimeterId, cancellationToken) ?? throw new NotFoundException();
 

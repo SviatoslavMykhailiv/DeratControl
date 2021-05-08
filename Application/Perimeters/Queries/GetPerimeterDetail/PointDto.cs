@@ -13,7 +13,8 @@ namespace Application.Perimeters.Queries.GetPerimeterDetail {
     public Guid TrapId { get; set; }
 
     public void Mapping(Profile profile) {
-      profile.CreateMap<Point, PointDto>();
+      profile.CreateMap<Point, PointDto>()
+        .ForMember(dest => dest.PointId, opt => opt.MapFrom(src => src.Id));
     }
   }
 }

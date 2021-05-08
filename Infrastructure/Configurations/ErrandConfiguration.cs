@@ -8,7 +8,6 @@ namespace Infrastructure.Configurations {
     public override void Configure(EntityTypeBuilder<Errand> builder) {
       base.Configure(builder);
 
-      builder.Property(c => c.ErrandId).HasColumnName("ErrandID");
       builder.Property(c => c.FacilityId).HasColumnName("FacilityFID");
       builder.Property(c => c.EmployeeId).HasColumnName("EmployeeFID");
 
@@ -16,6 +15,8 @@ namespace Infrastructure.Configurations {
         .HasOne(e => (ApplicationUser)e.Employee)
         .WithMany(e => e.Errands)
         .HasForeignKey(e => e.EmployeeId);
+
+      builder.HasMany(e => e.Points).WithOne(p => p.Errand).OnDelete(DeleteBehavior.Cascade);
     }
   }
 }

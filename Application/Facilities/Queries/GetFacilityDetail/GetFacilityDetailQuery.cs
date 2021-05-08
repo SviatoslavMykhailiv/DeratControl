@@ -1,5 +1,7 @@
-﻿using Application.Common.Exceptions;
+﻿using Application.Common;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
+using Application.Common.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -16,23 +18,24 @@ namespace Application.Facilities.Queries.GetFacilityDetail {
 
     public Guid FacilityId { get; }
 
-    public class GetFacilityDetailQueryHandler : IRequestHandler<GetFacilityDetailQuery, FacilityDetailVm> {
-      private readonly IDeratControlDbContext context;
+    public class GetFacilityDetailQueryHandler : BaseRequestHandler<GetFacilityDetailQuery, FacilityDetailVm> {
+      private readonly IDeratControlDbContext db;
       private readonly IMapper mapper;
 
-      public GetFacilityDetailQueryHandler(IDeratControlDbContext context, IMapper mapper) {
-        this.context = context;
+      public GetFacilityDetailQueryHandler(ICurrentUserProvider currentUserProvider, ICurrentDateService currentDateService, IDeratControlDbContext db, IMapper mapper) : base(currentDateService, currentUserProvider) {
+        this.db = db;
         this.mapper = mapper;
       }
 
-      public async Task<FacilityDetailVm> Handle(GetFacilityDetailQuery request, CancellationToken cancellationToken) {
-        var facility = await context
+      protected override async Task<FacilityDetailVm> Handle(RequestContext context, GetFacilityDetailQuery request, CancellationToken cancellationToken) {
+        var facility = await db
           .Facilities
+          .AsNoTracking()
           .ProjectTo<FacilityDetailVm>(mapper.ConfigurationProvider)
-          .FirstOrDefaultAsync(f => f.FacilityId == request.FacilityId);
+          .FirstOrDefaultAsync(f => f.FacilityId == request.FacilityId, cancellationToken: cancellationToken) ?? throw new NotFoundException();
 
-        if (facility == null)
-          throw new NotFoundException();
+        if (context.CurrentUser.Role == UserRole.Employee)
+          facility.Obfuscate();
 
         return facility;
       }

@@ -5,11 +5,12 @@ using System;
 
 namespace Application.Facilities.Queries.GetFacilityDetail {
   public class PerimeterHeaderDto : IMapFrom<Perimeter> {
-    public Guid PerimeterId { get; set; }
-    public string PerimeterName { get; set; }
+    public Guid PerimeterId { get; init; }
+    public string PerimeterName { get; init; }
 
     public void Mapping(Profile profile) {
-      profile.CreateMap<Perimeter, PerimeterHeaderDto>();
+      profile.CreateMap<Perimeter, PerimeterHeaderDto>()
+        .ForMember(dest => dest.PerimeterId, opt => opt.MapFrom(src => src.Id));
     }
   }
 }
