@@ -2,6 +2,7 @@
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Domain.Entities {
   public class PointReview : AuditableEntity {
@@ -45,5 +46,7 @@ namespace Domain.Entities {
       foreach (var field in Point.Trap.Fields)
         records.Add(new PointReviewRecord { Field = field, Value = string.Empty });
     }
+
+    public string this[Guid fieldId] => records.FirstOrDefault(v => v.Field.Id == fieldId)?.Value;
   }
 }

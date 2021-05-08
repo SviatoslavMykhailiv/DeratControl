@@ -1,5 +1,9 @@
 ﻿using Application.Common.Interfaces;
+using DeratControl.Infrastructure.Services.Reports;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Infrastructure.Identity;
+using Infrastructure.Options;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +45,19 @@ namespace Infrastructure {
       services.AddScoped<IAuthService, AuthService>();
       services.AddScoped<IUserManagerService, UserManagerService>();
       services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
+
+      services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+      services.AddTransient<IReportBuilder, HTMLReportBuilder>();
+
+      services.AddOptions<EncryptionOptions>().Configure(options =>
+      {
+        options.IV = new byte[] { 255, 64, 191, 111, 23, 3, 113, 119, 231, 121, 252, 112, 79, 32, 114, 156 };
+        options.Key = Encoding.ASCII.GetBytes(configuration["Security:QrCodeSymmetricEncryptionKey"]);
+      });
+
+      services.AddSingleton<IEncryptionService, AESEncryptionService>();
+      services.AddSingleton<IQRCodeService, QRCodeService>();
+      services.AddSingleton<IQRListGenerator, QRListGenerator>();
 
       services.AddOptions<AuthOptions>().Configure(c =>
       {

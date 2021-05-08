@@ -1,5 +1,6 @@
 ﻿using Application.Errands.Commands.CompleteErrand;
 using Application.Errands.Commands.DeleteErrand;
+using Application.Errands.Commands.GenerateReport;
 using Application.Errands.Commands.UpsertErrand;
 using Application.Errands.Queries;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +21,12 @@ namespace API.Controllers {
 
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandListQuery(), cancellationToken));
+
+    [HttpGet("{errandId}/report")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetReport(
+      [FromRoute] Guid errandId,
+      CancellationToken cancellationToken) => File(await Mediator.Send(new GenerateReportCommand(errandId), cancellationToken), "application/pdf");
 
     [HttpPost("complete")]
     public async Task<IActionResult> Complete(

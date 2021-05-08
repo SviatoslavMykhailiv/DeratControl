@@ -12,5 +12,7 @@ namespace Domain.Entities {
     Facility Facility { get; set; }
     ICollection<Errand> Errands { get; set; }
     ICollection<DefaultFacility> DefaultFacilities { get; set; }
+    string GetFullName();
+    bool HasDefaultFacility(Guid facilityId);
   }
 }

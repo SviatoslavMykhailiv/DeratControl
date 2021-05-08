@@ -6,6 +6,7 @@ using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,11 +19,11 @@ namespace Infrastructure.Services {
     private const string PROVIDER = nameof(PROVIDER);
 
     private readonly UserManager<ApplicationUser> userManager;
-    private readonly IDeratControlDbContext context;
+    private readonly DeratControlDbContext context;
 
     public UserManagerService(
       UserManager<ApplicationUser> userManager, 
-      IDeratControlDbContext context) {
+      DeratControlDbContext context) {
       this.userManager = userManager;
       this.context = context;
     }
@@ -82,6 +83,17 @@ namespace Infrastructure.Services {
 
     public async Task<IUser> GetUser(Guid userId, CancellationToken cancellationToken = default) {
       return await userManager.FindByIdAsync(userId.ToString());
+    }
+
+    public async Task<IReadOnlyCollection<IUser>> GetEmployeeList(CancellationToken cancellationToken = default) {
+      return await (from user in context.Users.Include(u => u.DefaultFacilities)
+                    join userRole in context.UserRoles
+                    on user.Id equals userRole.UserId
+                    join role in context.Roles
+                    on userRole.RoleId equals role.Id
+                    where role.Name == EMPLOYEE
+                    select user).AsNoTracking()
+              .ToListAsync(cancellationToken);
     }
   }
 }

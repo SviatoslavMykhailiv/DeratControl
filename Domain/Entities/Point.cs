@@ -1,4 +1,5 @@
 ﻿using Domain.Common;
+using Domain.ValueObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,6 +51,6 @@ namespace Domain.Entities {
 
     public IEnumerable<PointReview> Reviews => reviews;
 
-    public string GetIdentifier() => $"{PerimeterId}-{order}-{TrapId}";
+    public QRID GetIdentifier() => new QRID(PerimeterId, Order, TrapId);
   }
 }

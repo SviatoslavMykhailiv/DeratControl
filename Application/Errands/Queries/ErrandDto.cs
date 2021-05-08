@@ -3,6 +3,7 @@ using AutoMapper;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Application.Errands.Queries {
   public class ErrandDto : IMapFrom<Errand> {
@@ -21,7 +22,7 @@ namespace Application.Errands.Queries {
         .ForMember(dest => dest.FacilityName, opt => opt.MapFrom(src => src.Facility.Name))
         .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Facility.City))
         .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Facility.Address))
-        .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.DueDate.ToShortDateString()));
+        .ForMember(dest => dest.DueDate, opt => opt.MapFrom(src => src.DueDate.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)));
     }
   }
 }

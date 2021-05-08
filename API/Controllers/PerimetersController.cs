@@ -1,5 +1,6 @@
 ﻿using Application.Perimeters.Commands.UpsertPerimeter;
 using Application.Perimeters.Queries.GetPerimeterDetail;
+using Application.QRCodes.GeneratePointQRCodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -20,5 +21,10 @@ namespace API.Controllers {
     public async Task<IActionResult> Get(
       [FromRoute] Guid perimeterId, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetPerimeterDetailQuery(perimeterId), cancellationToken));
+
+    [HttpPost("qrs")]
+    public async Task<IActionResult> GenerateQRCodeList(
+      [FromBody] GeneratePointQRListCommand command, 
+      CancellationToken cancellationToken) => File(await Mediator.Send(command, cancellationToken), "application/pdf");
   }
 }

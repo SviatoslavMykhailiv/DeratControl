@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Infrastructure.Identity {
   public class ApplicationUser : IdentityUser<Guid>, IUser {
@@ -13,5 +14,11 @@ namespace Infrastructure.Identity {
     public Facility Facility { get; set; }
     public ICollection<Errand> Errands { get; set; }
     public ICollection<DefaultFacility> DefaultFacilities { get; set; }
+
+    public string GetFullName() => $"{LastName}, {FirstName}";
+
+    public bool HasDefaultFacility(Guid facilityId) {
+      return DefaultFacilities.Any(d => d.FacilityId == facilityId);
+    }
   }
 }

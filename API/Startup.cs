@@ -3,10 +3,14 @@ using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace API {
   public class Startup {
@@ -23,7 +27,28 @@ namespace API {
 
       services.AddApplication();
       services.AddInfrastructure(Configuration);
+
+      services.AddCors(options => {
+        options.AddPolicy("Default", builder => {
+          builder.AllowAnyOrigin();
+          builder.AllowAnyMethod();
+          builder.AllowAnyHeader();
+        });
+      });
+
       services.AddMemoryCache();
+      services.Configure<RequestLocalizationOptions>(options => {
+        var supportedCultures = new List<CultureInfo> {
+            new("en-US"),
+            new("uk-UA"),
+            new("ru-RU")
+        };
+
+        options.DefaultRequestCulture = new RequestCulture("uk-UA");
+        options.SupportedCultures = supportedCultures;
+        options.SupportedUICultures = supportedCultures;
+      });
+
       services.AddSwaggerGen(c => {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
         c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
@@ -59,6 +84,10 @@ namespace API {
         app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
       }
 
+      var localizationOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
+      app.UseRequestLocalization(localizationOptions.Value);
+
+      app.UseCors("Default");
       app.UseRouting();
 
       app.UseAuthorization();
