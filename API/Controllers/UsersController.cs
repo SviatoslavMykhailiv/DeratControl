@@ -15,7 +15,6 @@ namespace API.Controllers {
       [FromBody] UpsertUserCommand command, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
-    [AllowAnonymous]
     [HttpGet("employees")]
     public async Task<IActionResult> GetEmployeeList([FromQuery] GetEmployeeListQuery query) => Ok(await Mediator.Send(query));
   }

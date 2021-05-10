@@ -18,15 +18,18 @@ namespace Application.Supplements.Commands.DeleteSupplement {
 
     public class DeleteSupplementCommandHandler : BaseRequestHandler<DeleteSupplementCommand, Unit> {
       private readonly IDeratControlDbContext db;
+      private readonly IFileStorage fileStorage;
       private readonly IMemoryCache cache;
 
       public DeleteSupplementCommandHandler(
         IMemoryCache cache,
         ICurrentDateService currentDateService,
         ICurrentUserProvider currentUserProvider, 
-        IDeratControlDbContext db) : base(currentDateService, currentUserProvider) {
+        IDeratControlDbContext db,
+        IFileStorage fileStorage) : base(currentDateService, currentUserProvider) {
         this.cache = cache;
         this.db = db;
+        this.fileStorage = fileStorage;
       }
 
       protected override async Task<Unit> Handle(RequestContext context, DeleteSupplementCommand request, CancellationToken cancellationToken) {
@@ -37,6 +40,8 @@ namespace Application.Supplements.Commands.DeleteSupplement {
 
         db.Supplements.Remove(supplement);
         await db.SaveChangesAsync(cancellationToken);
+
+        await fileStorage.Remove(supplement.CertificateFilePath);
         
         cache.Remove(nameof(Supplement));
 

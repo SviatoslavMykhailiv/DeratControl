@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Domain.ValueObjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,9 +19,10 @@ namespace Application.Perimeters.Commands.UpsertPerimeter {
     public Guid? PerimeterId { get; set; }
     public Guid FacilityId { get; set; }
     public string PerimeterName { get; set; }
-    public byte[] SchemeImage { get; set; }
+    public string SchemeImage { get; set; }
     public int LeftLoc { get; set; }
     public int TopLoc { get; set; }
+    public decimal Scale { get; init; }
     public ICollection<PointDto> Points { get; set; } = new List<PointDto>();
 
     public class UpsertPerimeterCommandHandler : IRequestHandler<UpsertPerimeterCommand, Guid> {
@@ -48,10 +50,19 @@ namespace Application.Perimeters.Commands.UpsertPerimeter {
 
         var supplements = await GetSupplements();
         var traps = await GetTraps();
+        
+        
 
         perimeter.LeftLoc = request.LeftLoc;
         perimeter.TopLoc = request.TopLoc;
         perimeter.PerimeterName = request.PerimeterName;
+        perimeter.Scale = request.Scale;
+        var image = (Image)request.SchemeImage;
+        
+        if (image is not null) {
+          perimeter.GenerateSchemePath(image.Format);
+          await fileStorage.SaveFile(perimeter.SchemeImagePath, image);
+        }
 
         var inputPointList = request.Points.Where(p => p.PointId.HasValue).ToDictionary(p => p.PointId);
 
@@ -72,7 +83,7 @@ namespace Application.Perimeters.Commands.UpsertPerimeter {
             supplements[point.SupplementId]);
 
         await context.SaveChangesAsync(cancellationToken);
-        //await fileStorage.SaveFile(perimeter.SchemeImagePath, request.SchemeImage);
+        
 
         return perimeter.Id;
       }

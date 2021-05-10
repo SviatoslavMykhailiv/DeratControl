@@ -1,6 +1,7 @@
 ﻿using Domain.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Domain.Entities {
@@ -15,6 +16,9 @@ namespace Domain.Entities {
     public string PerimeterName { get; set; }
     public Facility Facility { get; init; }
     public IEnumerable<Point> Points => points;
+    public decimal Scale { get; set; }
+
+    public string SchemeImagePath { get; private set; }
 
     public void SetPoint(Guid? pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement) {
       if (pointId.HasValue)
@@ -25,6 +29,10 @@ namespace Domain.Entities {
 
     public void RemovePoint(Guid pointId) {
       points.RemoveWhere(p => p.Id == pointId);
+    }
+
+    public void GenerateSchemePath(string format) {
+      SchemeImagePath = Path.Combine("perimeters", "schemes", $"{Id}.{format}");
     }
 
     private void AddPoint(int order, int leftLoc, int topLoc, Trap trap, Supplement supplement) {

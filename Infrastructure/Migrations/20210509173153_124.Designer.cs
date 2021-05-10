@@ -3,15 +3,17 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DeratControlDbContext))]
-    partial class DeratControlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210509173153_124")]
+    partial class _124
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,9 +177,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("PerimeterName")
                         .HasColumnType("text");
-
-                    b.Property<decimal>("Scale")
-                        .HasColumnType("numeric");
 
                     b.Property<string>("SchemeImagePath")
                         .HasColumnType("text");

@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Entities;
+using Domain.ValueObjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -12,7 +13,7 @@ namespace Application.Supplements.Commands.UpsertSupplement {
     public Guid? SupplementId { get; init; }
     public string SupplementName { get; init; }
     public DateTime ExpirationDate { get; init; }
-    public byte[] Certificate { get; init; }
+    public string Certificate { get; init; }
 
     public class UpsertSupplementCommandHandler : IRequestHandler<UpsertSupplementCommand, Guid> {
       private readonly IDeratControlDbContext context;
@@ -38,14 +39,18 @@ namespace Application.Supplements.Commands.UpsertSupplement {
           context.Supplements.Add(supplement);
         }
 
+        var image = (Image)request.Certificate;
+
         supplement.ExpirationDate = request.ExpirationDate;
         supplement.SupplementName = request.SupplementName;
-
         
-        
+        if(image is not null) {
+          supplement.GeneratePath(image.Format);
+          await fileStorage.SaveFile(supplement.CertificateFilePath, image);
+        }
+       
         await context.SaveChangesAsync(cancellationToken);
-        //await fileStorage.SaveFile(supplement.CertificatePath, request.Certificate);
-
+        
         cache.Remove(nameof(Supplement));
 
         return supplement.Id;

@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace Application.Traps.Commands.UpsertTrap {
   public class UpsertTrapCommand : IRequest<Guid> {
-    public Guid? Id { get; set; }
-    public string Name { get; set; }
+    public Guid? TrapId { get; set; }
+    public string TrapName { get; set; }
     public string Color { get; set; }
     public IReadOnlyCollection<FieldDto> Fields { get; init; } = new List<FieldDto>();
 
@@ -28,15 +29,17 @@ namespace Application.Traps.Commands.UpsertTrap {
 
         Trap trap;
 
-        if (request.Id.HasValue) {
-          trap = await context.Traps.FindAsync(new object[] { request.Id.Value }, cancellationToken);
+        if (request.TrapId.HasValue) {
+          trap = await context
+            .Traps
+            .Include(t => t.Fields).FirstOrDefaultAsync(t => t.Id == request.TrapId.Value, cancellationToken);
         }
         else {
           trap = new Trap();
           context.Traps.Add(trap);
         }
 
-        trap.TrapName = request.Name;
+        trap.TrapName = request.TrapName;
         trap.Color = request.Color;
 
         var inputFieldList = request.Fields.Where(f => f.FieldId.HasValue).ToDictionary(f => f.FieldId.Value);

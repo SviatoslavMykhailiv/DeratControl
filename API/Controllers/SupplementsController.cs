@@ -1,9 +1,11 @@
-﻿using Application.Supplements.Commands.DeleteSupplement;
+﻿using Application.Common.Interfaces;
+using Application.Supplements.Commands.DeleteSupplement;
 using Application.Supplements.Commands.UpsertSupplement;
 using Application.Supplements.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +22,15 @@ namespace API.Controllers {
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetSupplementListQuery(), cancellationToken));
 
-    [HttpDelete]
+    [HttpDelete("{supplementId}")]
     public async Task<IActionResult> Delete(
       [FromRoute] Guid supplementId, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteSupplementCommand(supplementId), cancellationToken));
+
+    [HttpGet("certificate/{fileName}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCertificate(
+      [FromRoute] string fileName, 
+      [FromServices] IFileStorage fileStorage) => File(await fileStorage.ReadFile(Path.Combine("supplements", "certificate", fileName)), $"image/{fileName.Split('.')[1]}");
   }
 }

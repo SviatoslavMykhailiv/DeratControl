@@ -2,6 +2,7 @@
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
+using Domain.ValueObjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -16,11 +17,13 @@ namespace Application.Supplements.Queries {
       private readonly IDeratControlDbContext context;
       private readonly IMapper mapper;
       private readonly IMemoryCache cache;
+      private readonly IFileStorage fileStorage;
 
-      public GetSupplementListQueryHandler(IDeratControlDbContext context, IMapper mapper, IMemoryCache cache) {
+      public GetSupplementListQueryHandler(IDeratControlDbContext context, IMapper mapper, IMemoryCache cache, IFileStorage fileStorage) {
         this.context = context;
         this.mapper = mapper;
         this.cache = cache;
+        this.fileStorage = fileStorage;
       }
 
       public async Task<IEnumerable<SupplementDto>> Handle(GetSupplementListQuery request, CancellationToken cancellationToken) {

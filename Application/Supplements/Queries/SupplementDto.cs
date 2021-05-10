@@ -8,9 +8,11 @@ namespace Application.Supplements.Queries {
     public Guid SupplementId { get; init; }
     public string SupplementName { get; init; }
     public DateTime ExpirationDate { get; init; }
-    public string CertificatePath { get; init; }
+    public string Certificate { get; init; }
     public void Mapping(Profile profile) {
-      profile.CreateMap<Supplement, SupplementDto>().ForMember(dest => dest.SupplementId, opt => opt.MapFrom(src => src.Id));
+      profile.CreateMap<Supplement, SupplementDto>()
+        .ForMember(dest => dest.SupplementId, opt => opt.MapFrom(src => src.Id))
+        .ForMember(dest => dest.Certificate, opt => opt.MapFrom(src => src.CertificateFilePath));
     }
   }
 }

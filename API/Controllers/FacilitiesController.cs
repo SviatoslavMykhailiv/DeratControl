@@ -1,4 +1,5 @@
-﻿using Application.Facilities.Commands.UpsertFacility;
+﻿using Application.Facilities.Commands.DeleteFacility;
+using Application.Facilities.Commands.UpsertFacility;
 using Application.Facilities.Queries.GetFacilityDetail;
 using Application.Facilities.Queries.GetFacilityList;
 using Application.QRCodes.GenerateFacilityQRCodes;
@@ -31,5 +32,10 @@ namespace API.Controllers {
     public async Task<IActionResult> Get(
       [FromRoute] Guid facilityId, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetFacilityDetailQuery(facilityId), cancellationToken));
+
+    [HttpDelete("{facilityId}")]
+    public async Task<IActionResult> Delete(
+      [FromRoute] Guid facilityId,
+      CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteFacilityCommand(facilityId), cancellationToken));
   }
 }

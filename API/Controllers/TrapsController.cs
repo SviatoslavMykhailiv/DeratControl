@@ -20,7 +20,7 @@ namespace API.Controllers {
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetTrapListQuery(), cancellationToken));
 
-    [HttpDelete]
+    [HttpDelete("{trapId}")]
     public async Task<IActionResult> Delete(
       [FromRoute] Guid trapId, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteTrapCommand(trapId), cancellationToken));
