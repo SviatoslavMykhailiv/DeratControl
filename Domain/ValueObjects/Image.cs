@@ -1,30 +1,37 @@
 ﻿using System;
 
-namespace Domain.ValueObjects {
-  public class Image {
+namespace Domain.ValueObjects
+{
+    public class Image
+    {
 
-    private readonly byte[] byteArray;
-    public string Format { get; }
+        private readonly byte[] byteArray;
+        public string Format { get; }
 
-    public static implicit operator Image(string input) {
-      if (string.IsNullOrEmpty(input))
-        return null;
+        public static implicit operator Image(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return null;
 
-      var tokenList = input.Split(',');
+            if (input.StartsWith("data:image/") == false)
+                return null;
 
-      if (tokenList.Length == 1)
-        return new Image(Convert.FromBase64String(tokenList[0]), null);
+            var tokenList = input.Split(',');
 
-      var format = tokenList[0].Replace("data:image/", string.Empty).Replace(";base64", string.Empty);
+            if (tokenList.Length == 1)
+                return new Image(Convert.FromBase64String(tokenList[0]), null);
 
-      return new Image(Convert.FromBase64String(tokenList[1]), format);
+            var format = tokenList[0].Replace("data:image/", string.Empty).Replace(";base64", string.Empty);
+
+            return new Image(Convert.FromBase64String(tokenList[1]), format);
+        }
+
+        private Image(byte[] byteArray, string format)
+        {
+            this.byteArray = byteArray;
+            Format = format;
+        }
+
+        public static implicit operator byte[](Image str) => str?.byteArray;
     }
-
-    private Image(byte[] byteArray, string format) {
-      this.byteArray = byteArray;
-      Format = format;
-    }
-
-    public static implicit operator byte[] (Image str) => str?.byteArray;
-  }
 }
