@@ -44,7 +44,7 @@ namespace Application.Errands.Queries
                   .ProjectTo<ErrandDto>(mapper.ConfigurationProvider)
                   .ToListAsync(cancellationToken: cancellationToken);
 
-                foreach (var errand in errands.Where(e => Convert.ToDateTime(e.DueDate) < context.CurrentDateTime))
+                foreach (var errand in errands.Where(e => Convert.ToDateTime(e.DueDate).Date < context.CurrentDateTime.Date))
                     await mediator.Send(new MoveErrandCommand { ErrandId = errand.ErrandId }, cancellationToken);
 
                 return errands.Select(e => mapper.Map<ErrandDto>(e)).ToList();

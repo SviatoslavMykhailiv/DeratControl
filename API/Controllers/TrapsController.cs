@@ -12,14 +12,17 @@ namespace API.Controllers {
   [ApiController]
   [Authorize(AuthenticationSchemes = "Bearer")]
   public class TrapsController : BaseController {
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpPost]
     public async Task<IActionResult> Upsert(
       [FromBody] UpsertTrapCommand command, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetTrapListQuery(), cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpDelete("{trapId}")]
     public async Task<IActionResult> Delete(
       [FromRoute] Guid trapId, 

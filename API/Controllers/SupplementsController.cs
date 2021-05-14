@@ -12,16 +12,18 @@ using System.Threading.Tasks;
 namespace API.Controllers {
   [Route("api/[controller]")]
   [ApiController]
-  [Authorize(AuthenticationSchemes = "Bearer")]
   public class SupplementsController : BaseController {
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpPost]
     public async Task<IActionResult> Upsert(
       [FromBody] UpsertSupplementCommand command,
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetSupplementListQuery(), cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpDelete("{supplementId}")]
     public async Task<IActionResult> Delete(
       [FromRoute] Guid supplementId, 

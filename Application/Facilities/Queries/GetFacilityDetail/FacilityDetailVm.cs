@@ -26,7 +26,7 @@ namespace Application.Facilities.Queries.GetFacilityDetail
 
         public void Obfuscate()
         {
-            CompanyName = string.Empty;
+            CompanyName = Name;
             SecurityCode = string.Empty;
         }
     }

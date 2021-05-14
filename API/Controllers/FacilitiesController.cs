@@ -14,13 +14,14 @@ namespace API.Controllers {
   [ApiController]
   [Authorize(AuthenticationSchemes = "Bearer")]
   public class FacilitiesController : BaseController {
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpPost]
     public async Task<IActionResult> Upsert(
       [FromBody] UpsertFacilityCommand command, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpPost("qrs")]
-    [AllowAnonymous]
     public async Task<IActionResult> GenerateQRCodeList(
       [FromBody] GenerateFacilityQRCodesCommand command,
       CancellationToken cancellationToken) => File(await Mediator.Send(command, cancellationToken), "application/pdf");
@@ -33,6 +34,7 @@ namespace API.Controllers {
       [FromRoute] Guid facilityId, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetFacilityDetailQuery(facilityId), cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpDelete("{facilityId}")]
     public async Task<IActionResult> Delete(
       [FromRoute] Guid facilityId,

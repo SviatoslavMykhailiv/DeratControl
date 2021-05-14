@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace API.Controllers {
   [Route("api/[controller]")]
   [ApiController]
-  [Authorize(AuthenticationSchemes = "Bearer")]
+  [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
   public class UsersController : BaseController {
     [HttpPost]
     public async Task<IActionResult> Upsert(

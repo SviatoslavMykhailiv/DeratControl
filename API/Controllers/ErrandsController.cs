@@ -13,32 +13,36 @@ using System.Threading.Tasks;
 namespace API.Controllers {
   [Route("api/[controller]")]
   [ApiController]
-  [Authorize(AuthenticationSchemes = "Bearer")]
   public class ErrandsController : BaseController {
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpPost]
     public async Task<IActionResult> Upsert(
       [FromBody] UpsertErrandCommand command, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandListQuery(), cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
     [HttpGet("{errandId}")]
     public async Task<IActionResult> Get(
       [FromRoute]Guid errandId, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandQuery(errandId), cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,CUSTOMER")]
     [HttpGet("{errandId}/report")]
-    [AllowAnonymous]
     public async Task<IActionResult> GetReport(
       [FromRoute] Guid errandId,
       CancellationToken cancellationToken) => File(await Mediator.Send(new GenerateReportCommand(errandId), cancellationToken), "application/pdf");
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "EMPLOYEE,PROVIDER")]
     [HttpPost("complete")]
     public async Task<IActionResult> Complete(
       [FromBody] CompleteErrandCommand command, 
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpDelete("{errandId}")]
     public async Task<IActionResult> Delete(
       [FromRoute]Guid errandId, 

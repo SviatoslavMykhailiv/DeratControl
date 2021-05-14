@@ -1,6 +1,8 @@
 ﻿using Domain.Common;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
@@ -65,6 +67,32 @@ namespace Domain.Entities {
       point.TopLoc = topLoc;
       point.Trap = trap;
       point.Supplement = supplement;
+    }
+
+    public byte[] GeneratePerimeterImage(byte[] image) {
+      using var imageStream = new MemoryStream(image);
+      using var bitmap = new Bitmap(imageStream);
+
+      var graphics = Graphics.FromImage(bitmap);
+
+      var linePen = new Pen(Brushes.Gray);
+      var font = new Font(new FontFamily("Times New Roman"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
+
+      foreach (var point in Points) {
+        var brush = new SolidBrush(ColorTranslator.FromHtml(point.Trap.Color));
+        graphics.FillEllipse(brush, point.LeftLoc - Point.RADIUS / 2, point.TopLoc - Point.RADIUS / 2, Point.RADIUS, Point.RADIUS);
+        graphics.DrawString(point.Order.ToString(), font, Brushes.Black, new PointF(point.LeftLoc + Point.RADIUS / 2, point.TopLoc - Point.RADIUS));
+      }
+
+      using var memoryStream = new MemoryStream();
+      var encoder = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Png.Guid);
+
+      using var encodingParams = new EncoderParameters(1);
+      encodingParams.Param[0] = new EncoderParameter(Encoder.Quality, 85L);
+
+      bitmap.Save(memoryStream, encoder, encodingParams);
+
+      return memoryStream.ToArray();
     }
   }
 }
