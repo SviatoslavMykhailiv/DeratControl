@@ -13,6 +13,7 @@ namespace Application.Users.Queries {
     public string LastName { get; init; }
     public string PhoneNumber { get; init; }
     public string Location { get; init; }
+    public bool Available { get; init; }
     public ICollection<Guid> Facilities { get; init; } = new List<Guid>();
 
     public void Mapping(Profile profile) {

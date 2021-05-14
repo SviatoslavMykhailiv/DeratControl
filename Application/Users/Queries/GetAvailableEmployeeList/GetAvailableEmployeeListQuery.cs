@@ -45,7 +45,7 @@ namespace Application.Users.Queries.GetAvailableEmployeeList {
       }
 
       public async Task<IEnumerable<UserDto>> Handle(GetAvailableEmployeeListQuery request, CancellationToken cancellationToken) {
-        var employeeList = (await userManagerService.GetEmployeeList(true, cancellationToken)).ToList();
+        var employeeList = (await userManagerService.GetEmployeeList(false, cancellationToken)).ToList();
         var busyEmployees = new HashSet<Guid>();
 
         if (request.FacilityId.HasValue && request.DueDate.HasValue) {
