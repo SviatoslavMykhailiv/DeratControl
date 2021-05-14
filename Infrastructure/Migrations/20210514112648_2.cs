@@ -2,22 +2,22 @@
 
 namespace Infrastructure.Migrations
 {
-    public partial class _125 : Migration
+    public partial class _2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "Scale",
-                table: "Perimeter",
+            migrationBuilder.AddColumn<bool>(
+                name: "Available",
+                table: "AspNetUsers",
                 nullable: false,
-                defaultValue: 0m);
+                defaultValue: false);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Scale",
-                table: "Perimeter");
+                name: "Available",
+                table: "AspNetUsers");
         }
     }
 }

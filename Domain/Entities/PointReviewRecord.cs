@@ -9,7 +9,7 @@ namespace Domain.Entities {
     private string value;
 
     public Guid PointReviewId { get; init; }
-    public Guid SupplementFieldId { get; init; }
+    public Guid FieldId { get; init; }
 
     public string Value {
       get => value;

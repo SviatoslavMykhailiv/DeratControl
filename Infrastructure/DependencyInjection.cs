@@ -18,7 +18,7 @@ namespace Infrastructure {
       services.AddDbContext<DeratControlDbContext>(options =>
                options.UseNpgsql(configuration.GetConnectionString("DeratControlDatabase")));
 
-      services.AddScoped<IDeratControlDbContext, DeratControlDbContext>();
+      services.AddTransient<IDeratControlDbContext, DeratControlDbContext>();
 
       services.AddSingleton<IFileStorage, FileStorage>();
       services.AddSingleton<ICurrentDateService, MachineDateService>();
@@ -47,7 +47,7 @@ namespace Infrastructure {
       services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 
       services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
-      services.AddTransient<IReportBuilder, HTMLReportBuilder>();
+      services.AddSingleton<IReportBuilder, HTMLReportBuilder>();
 
       services.AddOptions<EncryptionOptions>().Configure(options =>
       {

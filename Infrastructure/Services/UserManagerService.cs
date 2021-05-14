@@ -22,7 +22,7 @@ namespace Infrastructure.Services {
     private readonly DeratControlDbContext context;
 
     public UserManagerService(
-      UserManager<ApplicationUser> userManager, 
+      UserManager<ApplicationUser> userManager,
       DeratControlDbContext context) {
       this.userManager = userManager;
       this.context = context;
@@ -85,15 +85,21 @@ namespace Infrastructure.Services {
       return await userManager.FindByIdAsync(userId.ToString());
     }
 
-    public async Task<IReadOnlyCollection<IUser>> GetEmployeeList(CancellationToken cancellationToken = default) {
+    public async Task<IReadOnlyCollection<IUser>> GetEmployeeList(bool includeInactive = true, CancellationToken cancellationToken = default) {
       return await (from user in context.Users.Include(u => u.DefaultFacilities)
                     join userRole in context.UserRoles
                     on user.Id equals userRole.UserId
                     join role in context.Roles
                     on userRole.RoleId equals role.Id
-                    where role.Name == EMPLOYEE
+                    where role.Name == EMPLOYEE && (includeInactive || user.Available)
                     select user).AsNoTracking()
               .ToListAsync(cancellationToken);
+    }
+
+    public async Task SetUserAvailability(Guid userId, bool available) {
+      var user = await userManager.FindByIdAsync(userId.ToString()) ?? throw new NotFoundException();
+      user.Available = available;
+      await userManager.UpdateAsync(user);
     }
   }
 }

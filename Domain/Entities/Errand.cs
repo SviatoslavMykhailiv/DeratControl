@@ -114,18 +114,19 @@ namespace Domain.Entities {
     public void SetPointListForReview(IEnumerable<Guid> selectedPointList) {
       AssertErrandNotFinished();
 
+      var inputPointSet = selectedPointList.ToHashSet();
+
       var existingPointList = points.ToDictionary(p => p.PointId);
 
-      var removePointList = (from pointId in selectedPointList
-                     where existingPointList.ContainsKey(pointId) == false
-                     select pointId)
-                     .ToHashSet();
+      var removePointList = from pointId in existingPointList.Keys
+                             where inputPointSet.Contains(pointId) == false
+                             select pointId;
 
       points.RemoveWhere(p => removePointList.Contains(p.PointId));
 
       var pointList = Facility.Perimeters.SelectMany(p => p.Points).ToDictionary(p => p.Id);
 
-      foreach(var pointId in selectedPointList) {
+      foreach(var pointId in selectedPointList.Where(id => existingPointList.ContainsKey(id) == false)) {
         var pointReview = new PointReview(pointList[pointId]);
         points.Add(pointReview);
       }

@@ -14,6 +14,7 @@ namespace Infrastructure.Identity {
     public Facility Facility { get; set; }
     public ICollection<Errand> Errands { get; set; }
     public ICollection<DefaultFacility> DefaultFacilities { get; set; }
+    public bool Available { get; set; }
 
     public string GetFullName() => $"{LastName}, {FirstName}";
 

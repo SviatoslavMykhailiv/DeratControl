@@ -8,7 +8,7 @@ namespace Infrastructure.Configurations {
       base.Configure(builder);
 
       builder.Property(c => c.PointReviewId).HasColumnName("PointReviewFID");
-      builder.Property(c => c.SupplementFieldId).HasColumnName("SupplementFieldID");
+      builder.Property(c => c.FieldId).HasColumnName("FieldFID");
     }
   }
 }

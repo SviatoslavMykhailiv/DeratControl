@@ -72,8 +72,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Report")
                         .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint");
 
                     b.HasKey("Id");
 
@@ -280,7 +280,8 @@ namespace Infrastructure.Migrations
                         .HasColumnName("PointReviewRecordID")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("FieldId")
+                    b.Property<Guid>("FieldId")
+                        .HasColumnName("FieldFID")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("ModifiedAt")
@@ -291,10 +292,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<Guid>("PointReviewId")
                         .HasColumnName("PointReviewFID")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SupplementFieldId")
-                        .HasColumnName("SupplementFieldID")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Value")
@@ -395,6 +392,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Available")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -655,7 +655,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Field", "Field")
                         .WithMany()
-                        .HasForeignKey("FieldId");
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.PointReview", "PointReview")
                         .WithMany("Records")

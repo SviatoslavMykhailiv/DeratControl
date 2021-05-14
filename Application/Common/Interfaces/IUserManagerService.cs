@@ -10,6 +10,7 @@ namespace Application.Common.Interfaces {
     Task<Guid> SaveUser(UserDto user, CancellationToken cancellationToken = default);
     Task DeleteUser(Guid userId, CancellationToken cancellationToken = default);
     Task<IUser> GetUser(Guid userId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyCollection<IUser>> GetEmployeeList(CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<IUser>> GetEmployeeList(bool includeInactive = true, CancellationToken cancellationToken = default);
+    Task SetUserAvailability(Guid userId, bool available);
   }
 }

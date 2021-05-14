@@ -15,7 +15,7 @@ namespace Application.Errands.Queries
         public Guid TrapId { get; init; }
         public string TrapName { get; init; }
 
-        public IReadOnlyCollection<PointReviewRecordDto> Records { get; init; } = new List<PointReviewRecordDto>();
+        public ICollection<PointReviewRecordDto> Records { get; init; } = new List<PointReviewRecordDto>();
 
         public void Mapping(Profile profile)
         {

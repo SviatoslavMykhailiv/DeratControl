@@ -48,7 +48,8 @@ namespace Infrastructure.Migrations
                     ModifiedAt = table.Column<DateTime>(nullable: false),
                     ModifiedBy = table.Column<Guid>(nullable: false),
                     SupplementName = table.Column<string>(nullable: true),
-                    ExpirationDate = table.Column<DateTime>(nullable: false)
+                    ExpirationDate = table.Column<DateTime>(nullable: false),
+                    CertificateFilePath = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -136,7 +137,9 @@ namespace Infrastructure.Migrations
                     FacilityFID = table.Column<Guid>(nullable: false),
                     LeftLoc = table.Column<int>(nullable: false),
                     TopLoc = table.Column<int>(nullable: false),
-                    PerimeterName = table.Column<string>(nullable: true)
+                    PerimeterName = table.Column<string>(nullable: true),
+                    Scale = table.Column<decimal>(nullable: false),
+                    SchemeImagePath = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -294,7 +297,7 @@ namespace Infrastructure.Migrations
                     OriginalDueDate = table.Column<DateTime>(nullable: false),
                     DueDate = table.Column<DateTime>(nullable: false),
                     CompleteDate = table.Column<DateTime>(nullable: true),
-                    Status = table.Column<int>(nullable: false),
+                    Status = table.Column<byte>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     Report = table.Column<string>(nullable: true)
                 },
@@ -389,19 +392,18 @@ namespace Infrastructure.Migrations
                     ModifiedAt = table.Column<DateTime>(nullable: false),
                     ModifiedBy = table.Column<Guid>(nullable: false),
                     PointReviewFID = table.Column<Guid>(nullable: false),
-                    SupplementFieldID = table.Column<Guid>(nullable: false),
-                    Value = table.Column<string>(nullable: true),
-                    FieldId = table.Column<Guid>(nullable: true)
+                    FieldFID = table.Column<Guid>(nullable: false),
+                    Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PointReviewRecord", x => x.PointReviewRecordID);
                     table.ForeignKey(
-                        name: "FK_PointReviewRecord_Field_FieldId",
-                        column: x => x.FieldId,
+                        name: "FK_PointReviewRecord_Field_FieldFID",
+                        column: x => x.FieldFID,
                         principalTable: "Field",
                         principalColumn: "FieldID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PointReviewRecord_PointReview_PointReviewFID",
                         column: x => x.PointReviewFID,
@@ -503,9 +505,9 @@ namespace Infrastructure.Migrations
                 column: "PointFID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PointReviewRecord_FieldId",
+                name: "IX_PointReviewRecord_FieldFID",
                 table: "PointReviewRecord",
-                column: "FieldId");
+                column: "FieldFID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PointReviewRecord_PointReviewFID",

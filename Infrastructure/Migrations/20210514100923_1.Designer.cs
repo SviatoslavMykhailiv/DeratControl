@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DeratControlDbContext))]
-    [Migration("20210509200117_125")]
-    partial class _125
+    [Migration("20210514100923_1")]
+    partial class _1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -74,8 +74,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Report")
                         .HasColumnType("text");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<byte>("Status")
+                        .HasColumnType("smallint");
 
                     b.HasKey("Id");
 
@@ -282,7 +282,8 @@ namespace Infrastructure.Migrations
                         .HasColumnName("PointReviewRecordID")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("FieldId")
+                    b.Property<Guid>("FieldId")
+                        .HasColumnName("FieldFID")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("ModifiedAt")
@@ -293,10 +294,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<Guid>("PointReviewId")
                         .HasColumnName("PointReviewFID")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SupplementFieldId")
-                        .HasColumnName("SupplementFieldID")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Value")
@@ -657,7 +654,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Field", "Field")
                         .WithMany()
-                        .HasForeignKey("FieldId");
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.PointReview", "PointReview")
                         .WithMany("Records")
