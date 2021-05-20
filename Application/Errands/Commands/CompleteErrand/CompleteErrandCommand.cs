@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.ValueObjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,19 +18,22 @@ namespace Application.Errands.Commands.CompleteErrand {
     public Guid ErrandId { get; init; }
     public string Report { get; init; }
     public string SecurityCode { get; init; }
-    public byte[] Signature { get; init; }
+    public string Signature { get; init; }
     public IReadOnlyCollection<PointReviewDto> Points { get; init; } = new List<PointReviewDto>();
 
     public class CompleteErrandCommandHandler : BaseRequestHandler<CompleteErrandCommand, Unit> {
       private readonly IDeratControlDbContext db;
       private readonly ICurrentDateService currentDateService;
+      private readonly IFileStorage fileStorage;
 
       public CompleteErrandCommandHandler(
         ICurrentUserProvider currentUserProvider,
         IDeratControlDbContext db, 
-        ICurrentDateService currentDateService) : base(currentDateService, currentUserProvider) {
+        ICurrentDateService currentDateService,
+        IFileStorage fileStorage) : base(currentDateService, currentUserProvider) {
         this.db = db;
         this.currentDateService = currentDateService;
+        this.fileStorage = fileStorage;
       }
 
       protected override async Task<Unit> Handle(RequestContext context, CompleteErrandCommand request, CancellationToken cancellationToken) {
@@ -39,7 +43,10 @@ namespace Application.Errands.Commands.CompleteErrand {
         if (errand.IsSecurityCodeValid(request.SecurityCode) == false)
           throw new BadRequestException();
 
-        foreach(var point in errand.Points) {
+        if(string.IsNullOrEmpty(request.Signature))
+          throw new BadRequestException();
+
+        foreach (var point in errand.Points) {
           var pointData = incomingPointList.GetValueOrDefault(point.PointId);
 
           if (pointData is null) 
@@ -49,6 +56,10 @@ namespace Application.Errands.Commands.CompleteErrand {
         }
 
         errand.Complete(currentDateService.CurrentDate, request.Report);
+
+        var image = (Image)request.Signature;
+        
+        await fileStorage.SaveFile(errand.GetManagerSignatureFilePath(), image);
 
         await db.SaveChangesAsync(cancellationToken);
 

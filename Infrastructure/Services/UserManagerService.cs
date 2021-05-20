@@ -28,7 +28,7 @@ namespace Infrastructure.Services {
       this.context = context;
     }
 
-    public async Task<Guid> SaveUser(UserDto userModel, CancellationToken cancellationToken = default) {
+    public async Task<Guid> SaveUser(Guid? providerId, UserDto userModel, CancellationToken cancellationToken = default) {
 
       var user = await userManager.FindByNameAsync(userModel.UserName);
 
@@ -40,7 +40,11 @@ namespace Infrastructure.Services {
       var defaultFacilities = await context.Facilities.Where(f => userModel.Facilities.Contains(f.Id)).ToListAsync(cancellationToken: cancellationToken);
 
       if (user is null) {
+
+        var provider = providerId.HasValue ? await userManager.FindByIdAsync(providerId.ToString()) : null;
+
         user = new ApplicationUser {
+          Provider = provider,
           UserName = userModel.UserName,
           FirstName = userModel.FirstName,
           LastName = userModel.LastName,
@@ -85,13 +89,13 @@ namespace Infrastructure.Services {
       return await userManager.FindByIdAsync(userId.ToString());
     }
 
-    public async Task<IReadOnlyCollection<IUser>> GetEmployeeList(bool includeInactive = true, CancellationToken cancellationToken = default) {
+    public async Task<IReadOnlyCollection<IUser>> GetEmployeeList(Guid providerId, bool includeInactive = true, CancellationToken cancellationToken = default) {
       return await (from user in context.Users.Include(u => u.DefaultFacilities)
                     join userRole in context.UserRoles
                     on user.Id equals userRole.UserId
                     join role in context.Roles
                     on userRole.RoleId equals role.Id
-                    where role.Name == EMPLOYEE && (includeInactive || user.Available)
+                    where role.Name == EMPLOYEE && (includeInactive || user.Available) && user.ProviderId == providerId
                     select user).AsNoTracking()
               .ToListAsync(cancellationToken);
     }

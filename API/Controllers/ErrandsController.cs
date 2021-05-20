@@ -4,6 +4,7 @@ using Application.Errands.Commands.GenerateReport;
 using Application.Errands.Commands.UpsertErrand;
 using Application.Errands.Queries;
 using Application.Errands.Queries.GetErrand;
+using Application.Errands.Queries.GetErrandHistory;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,6 +24,13 @@ namespace API.Controllers {
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
     [HttpGet]
     public async Task<IActionResult> GetList(CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandListQuery(), cancellationToken));
+
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
+    [HttpGet("history")]
+    public async Task<IActionResult> GetHistoryList(
+      [FromQuery]Guid? facilityId, 
+      [FromQuery]Guid? employeeId, 
+      CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandHistoryQuery(facilityId, employeeId), cancellationToken));
 
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
     [HttpGet("{errandId}")]

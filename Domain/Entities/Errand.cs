@@ -2,6 +2,7 @@
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Domain.Entities {
@@ -28,6 +29,9 @@ namespace Domain.Entities {
 
     public Guid FacilityId { get; init; }
     public Guid EmployeeId { get; init; }
+
+    public Guid ProviderId { get; set; }
+    public IUser Provider { get; set; }
 
     public DateTime OriginalDueDate {
       get => originalDueDate;
@@ -81,35 +85,39 @@ namespace Domain.Entities {
       }
     }
 
+    public string GetManagerSignatureFilePath() => Path.Combine("signatures", $"{Id}-signature.png");
+
     public Facility Facility { get; set; }
     public IUser Employee { get; set; }
 
     public IEnumerable<PointReview> Points => points;
 
-    public bool IsOverdue(DateTime currentDate) => DueDate < currentDate;
+    public bool IsOverdue(DateTime currentDate) => DueDate.Date < currentDate.Date;
 
     public void SetDueDate(DateTime dueDate) {
       AssertErrandNotFinished();
 
-      DueDate = dueDate;
-      OriginalDueDate = dueDate;
+      DueDate = dueDate.Date;
+      OriginalDueDate = dueDate.Date;
     }
 
     public void MoveDueDate(DateTime currentDate) {
 
       AssertErrandNotFinished();
 
-      DueDate = currentDate.AddDays(1);
-      Status = ErrandStatus.Overdue;
+      if (IsOverdue(currentDate))
+        DueDate = currentDate.AddDays(1).Date;
     }
 
     public void Complete(DateTime completeDate, string report) {
       AssertErrandNotFinished();
 
-      CompleteDate = completeDate;
+      CompleteDate = completeDate.Date;
       Report = report;
       Status = ErrandStatus.Finished;
     }
+
+    public int GetDaysOverdue() => (DueDate.Date - OriginalDueDate.Date).Days;
 
     public void SetPointListForReview(IEnumerable<Guid> selectedPointList) {
       AssertErrandNotFinished();

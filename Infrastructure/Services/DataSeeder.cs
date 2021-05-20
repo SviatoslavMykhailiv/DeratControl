@@ -28,7 +28,7 @@ namespace Infrastructure.Services {
       }
 
       if (!await context.Users.AnyAsync()) {
-        await userManagerService.SaveUser(new UserDto {
+        await userManagerService.SaveUser(null, new UserDto {
           UserName = "admin",
           Password = "V@lr1n0k",
           FirstName = "admin",

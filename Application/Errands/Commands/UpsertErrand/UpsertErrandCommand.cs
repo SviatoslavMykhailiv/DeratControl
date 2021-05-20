@@ -1,5 +1,7 @@
-﻿using Application.Common.Exceptions;
+﻿using Application.Common;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
+using Application.Common.Models;
 using Domain.Entities;
 using Domain.Enums;
 using MediatR;
@@ -22,30 +24,27 @@ namespace Application.Errands.Commands.UpsertErrand {
     public string Description { get; init; }
     public IReadOnlyCollection<Guid> Points { get; init; } = new List<Guid>();
 
-    public class UpsertErrandCommandHandler : IRequestHandler<UpsertErrandCommand, Guid> {
-      private readonly IDeratControlDbContext context;
-      private readonly ICurrentDateService currentDateService;
+    public class UpsertErrandCommandHandler : BaseRequestHandler<UpsertErrandCommand, Guid> {
+      private readonly IDeratControlDbContext db;
       private readonly IUserManagerService userManagerService;
 
       public UpsertErrandCommandHandler(
-        IDeratControlDbContext context,
-        ICurrentDateService currentDateService,
-        IUserManagerService userManagerService) {
-
-        this.context = context;
-        this.currentDateService = currentDateService;
+        ICurrentDateService currentDateService, 
+        ICurrentUserProvider currentUserProvider,
+        IDeratControlDbContext db,
+        IUserManagerService userManagerService) : base(currentDateService, currentUserProvider) {
+        this.db = db;
         this.userManagerService = userManagerService;
       }
 
-      public async Task<Guid> Handle(UpsertErrandCommand request, CancellationToken cancellationToken) {
-
+      protected override async Task<Guid> Handle(RequestContext context, UpsertErrandCommand request, CancellationToken cancellationToken) {
         if (request.ErrandId is null && await ErrandExists(request.FacilityId, request.EmployeeId, request.DueDate))
           throw new BadRequestException();
 
         Errand errand;
 
         if (request.ErrandId.HasValue) {
-          errand = await context
+          errand = await db
             .Errands
             .Include(e => e.Points)
             .Include(c => c.Employee)
@@ -57,11 +56,11 @@ namespace Application.Errands.Commands.UpsertErrand {
             .FirstOrDefaultAsync(c => c.Id == request.ErrandId.Value && c.Status != ErrandStatus.Finished, cancellationToken: cancellationToken) ?? throw new NotFoundException();
         }
         else {
-          errand = new Errand();
-          context.Errands.Add(errand);
+          errand = new Errand { ProviderId = context.CurrentUser.UserId };
+          db.Errands.Add(errand);
         }
 
-        if (request.DueDate.Date < currentDateService.CurrentDate.Date)
+        if (request.DueDate.Date < context.CurrentDateTime.Date)
           throw new BadRequestException();
 
         if (errand.EmployeeId != request.EmployeeId)
@@ -74,7 +73,7 @@ namespace Application.Errands.Commands.UpsertErrand {
         errand.SetDueDate(request.DueDate);
         errand.SetPointListForReview(request.Points);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
 
         return errand.Id;
       }
@@ -83,13 +82,13 @@ namespace Application.Errands.Commands.UpsertErrand {
         Guid facilityId,
         Guid employeeId,
         DateTime dueDate) {
-        return context
+        return db
           .Errands
           .AnyAsync(e => e.FacilityId == facilityId && e.EmployeeId == employeeId && e.DueDate.Date == dueDate.Date);
       }
 
       private async Task<Facility> GetFacility(Guid facilityId, CancellationToken cancellationToken) {
-        return await context
+        return await db
           .Facilities
           .Include(f => f.Perimeters)
           .ThenInclude(p => p.Points)

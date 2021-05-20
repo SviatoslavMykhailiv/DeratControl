@@ -1,3 +1,4 @@
+using API.Filters;
 using Application;
 using Infrastructure;
 using Infrastructure.Services;
@@ -23,8 +24,9 @@ namespace API {
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services) {
 
-      services.AddControllers().AddNewtonsoftJson(options =>
-      {
+      services.AddControllers(config => {
+        config.Filters.Add(new ApiExceptionFilter());
+      }).AddNewtonsoftJson(options => {
         options.SerializerSettings.DateFormatString = "MM/dd/yyyy";
       });
 

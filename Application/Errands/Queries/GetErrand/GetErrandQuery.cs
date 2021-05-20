@@ -1,11 +1,11 @@
-﻿using Application.Common.Exceptions;
+﻿using Application.Common;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
+using Application.Common.Models;
+using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,26 +17,41 @@ namespace Application.Errands.Queries.GetErrand {
 
     public Guid ErrandId { get; }
 
-    public class GetErrandQueryHandler : IRequestHandler<GetErrandQuery, ErrandDto> {
+    public class GetErrandQueryHandler : BaseRequestHandler<GetErrandQuery, ErrandDto> {
       private readonly IDeratControlDbContext db;
-      private readonly IMapper mapper;
 
-      public GetErrandQueryHandler(IDeratControlDbContext db, IMapper mapper) {
+      public GetErrandQueryHandler(
+        ICurrentDateService currentDateService, 
+        ICurrentUserProvider currentUserProvider,
+        IDeratControlDbContext db) : base(currentDateService, currentUserProvider) {
         this.db = db;
-        this.mapper = mapper;
       }
 
-      public async Task<ErrandDto> Handle(GetErrandQuery request, CancellationToken cancellationToken) {
-        var errand = await db.Errands
-                 .AsNoTracking()
-                 .Where(e => e.Id == request.ErrandId)
-                 .ProjectTo<ErrandDto>(mapper.ConfigurationProvider)
-                 .FirstOrDefaultAsync(cancellationToken);
+      protected override async Task<ErrandDto> Handle(RequestContext context, GetErrandQuery request, CancellationToken cancellationToken) {
+        var errand = await GetErrandsQuery(request.ErrandId);
 
         if (errand is null)
           throw new NotFoundException();
 
-        return errand;
+        errand.MoveDueDate(context.CurrentDateTime);
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        return ErrandDto.Map(errand, context.CurrentUser);
+      }
+
+      private Task<Errand> GetErrandsQuery(Guid errandId) {
+        return db
+          .Errands
+          .Include(e => e.Employee)
+          .Include(e => e.Facility)
+          .ThenInclude(f => f.Perimeters)
+          .ThenInclude(p => p.Points)
+          .ThenInclude(p => p.Trap)
+          .Include(e => e.Points)
+          .ThenInclude(e => e.Records)
+          .ThenInclude(r => r.Field)
+          .FirstOrDefaultAsync(e => e.Id == errandId);
       }
     }
   }

@@ -1,4 +1,6 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,27 +18,30 @@ namespace Application.Traps.Commands.UpsertTrap {
     public string Color { get; set; }
     public IReadOnlyCollection<FieldDto> Fields { get; init; } = new List<FieldDto>();
 
-    public class UpsertTrapCommandHandler : IRequestHandler<UpsertTrapCommand, Guid> {
-      private readonly IDeratControlDbContext context;
+    public class UpsertTrapCommandHandler : BaseRequestHandler<UpsertTrapCommand, Guid> {
+      private readonly IDeratControlDbContext db;
       private readonly IMemoryCache cache;
 
-      public UpsertTrapCommandHandler(IDeratControlDbContext context, IMemoryCache cache) {
-        this.context = context;
+      public UpsertTrapCommandHandler(
+        ICurrentDateService currentDateService, 
+        ICurrentUserProvider currentUserProvider,
+        IDeratControlDbContext db, 
+        IMemoryCache cache) : base(currentDateService, currentUserProvider) {
+        this.db = db;
         this.cache = cache;
       }
 
-      public async Task<Guid> Handle(UpsertTrapCommand request, CancellationToken cancellationToken) {
-
+      protected override async Task<Guid> Handle(RequestContext context, UpsertTrapCommand request, CancellationToken cancellationToken) {
         Trap trap;
 
         if (request.TrapId.HasValue) {
-          trap = await context
+          trap = await db
             .Traps
             .Include(t => t.Fields).FirstOrDefaultAsync(t => t.Id == request.TrapId.Value, cancellationToken);
         }
         else {
-          trap = new Trap();
-          context.Traps.Add(trap);
+          trap = new Trap { ProviderId = context.CurrentUser.UserId };
+          db.Traps.Add(trap);
         }
 
         trap.TrapName = request.TrapName;
@@ -61,9 +66,9 @@ namespace Application.Traps.Commands.UpsertTrap {
             inputField.FieldType,
             inputField.OptionList);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
 
-        cache.Remove(nameof(Trap));
+        cache.Remove($"{nameof(Trap)}-{context.CurrentUser.UserId}");
 
         return trap.Id;
       }

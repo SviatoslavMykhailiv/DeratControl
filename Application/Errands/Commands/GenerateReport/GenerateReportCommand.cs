@@ -24,43 +24,49 @@ namespace Application.Errands.Commands.GenerateReport {
       private readonly IDeratControlDbContext db;
       private readonly IReportBuilder reportBuilder;
       private readonly IStringLocalizer<SharedResource> localizer;
+      private readonly IFileStorage fileStorage;
 
       public GenerateReportCommandHandler(
-        IDeratControlDbContext db, 
-        IReportBuilder reportBuilder, 
-        IStringLocalizer<SharedResource> localizer) {
+        IDeratControlDbContext db,
+        IReportBuilder reportBuilder,
+        IStringLocalizer<SharedResource> localizer,
+        IFileStorage fileStorage) {
         this.db = db;
         this.reportBuilder = reportBuilder;
         this.localizer = localizer;
+        this.fileStorage = fileStorage;
       }
 
       public async Task<byte[]> Handle(GenerateReportCommand request, CancellationToken cancellationToken) {
         var errand = await GetErrand(request.ErrandId, cancellationToken) ?? throw new NotFoundException();
-
+        var managerSignature = await fileStorage.ReadFile(errand.GetManagerSignatureFilePath());
         //var providerName = errand.Provider.Company == null ? errand.Provider.Name.GetFullName(CultureInfo.CurrentCulture) : errand.Provider.Company.CompanyName;
 
         reportBuilder
             .AddVerticalSpace()
             .AddText("ТОВ Залупа", Align.Center, 32)
             .AddVerticalSpace()
-            .AddText($"{localizer["ReviewDate"]}: {errand.CompleteDate.Value.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)}", Align.Right, 20)
+            .AddText($"{localizer["ReviewDate"].Value}: {errand.CompleteDate.Value.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)}", Align.Right, 20)
             .AddVerticalSpace()
-            .AddText($"{localizer["ReviewedBy"]}: {errand.Employee.GetFullName()}", Align.Right, 20)
+            .AddText($"{localizer["ReviewedBy"].Value}: {errand.Employee.GetFullName()}", Align.Right, 20)
             .AddVerticalSpace()
             .AddText(errand.Description, Align.Center, 24)
             .AddVerticalSpace()
             .AddText(errand.Facility.CompanyName, Align.Center, 24)
             .AddVerticalSpace();
 
-        var points = errand.Points.GroupBy(t => t.Point.Trap);
+        var points = errand.Points.OrderBy(p => p.Point.Order).GroupBy(t => t.Point.Trap);
 
-        var genericColumns = new List<string> { localizer["TrapOrder"], localizer["SupplementName"], localizer["Action"] };
+        var genericColumns = new List<string> { 
+          localizer["TrapOrder"].Value, 
+          localizer["SupplementName"].Value, 
+          localizer["Action"].Value };
 
         foreach (var trap in points) {
           var tableColumns = new List<string>(genericColumns);
           tableColumns.AddRange(trap.Key.Fields.OrderBy(f => f.Order).Select(field => field.FieldName));
 
-          tableColumns.Add(localizer["Notes"]);
+          tableColumns.Add(localizer["Notes"].Value);
 
           var table = new Table(tableColumns);
 
@@ -69,12 +75,12 @@ namespace Application.Errands.Commands.GenerateReport {
 
             row[genericColumns[0]] = point.Point.Order.ToString();
             row[genericColumns[1]] = point.Point.Supplement.SupplementName;
-            row[genericColumns[2]] = point.Status.ToString();
+            row[genericColumns[2]] = localizer[point.Status.ToString()].Value;
 
             foreach (var field in trap.Key.Fields.OrderBy(f => f.Order))
               row[field.FieldName] = point[field.Id];
 
-            row[localizer["Notes"]] = point.Report;
+            row[localizer["Notes"].Value] = point.Report;
           }
 
           reportBuilder.AddTable(table);
@@ -83,8 +89,9 @@ namespace Application.Errands.Commands.GenerateReport {
           reportBuilder.AddVerticalSpace();
         }
 
-        return reportBuilder.GetReport();
+        reportBuilder.AddSignature(managerSignature, Align.Right);
 
+        return reportBuilder.GetReport();
       }
 
       private async Task<Errand> GetErrand(Guid errandId, CancellationToken cancellationToken) {

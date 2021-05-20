@@ -23,55 +23,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Facility",
-                columns: table => new
-                {
-                    FacilityID = table.Column<Guid>(nullable: false),
-                    ModifiedAt = table.Column<DateTime>(nullable: false),
-                    ModifiedBy = table.Column<Guid>(nullable: false),
-                    CompanyName = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    City = table.Column<string>(nullable: true),
-                    Address = table.Column<string>(nullable: true),
-                    SecurityCode = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Facility", x => x.FacilityID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Supplement",
-                columns: table => new
-                {
-                    SupplementID = table.Column<Guid>(nullable: false),
-                    ModifiedAt = table.Column<DateTime>(nullable: false),
-                    ModifiedBy = table.Column<Guid>(nullable: false),
-                    SupplementName = table.Column<string>(nullable: true),
-                    ExpirationDate = table.Column<DateTime>(nullable: false),
-                    CertificateFilePath = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Supplement", x => x.SupplementID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Trap",
-                columns: table => new
-                {
-                    TrapID = table.Column<Guid>(nullable: false),
-                    ModifiedAt = table.Column<DateTime>(nullable: false),
-                    ModifiedBy = table.Column<Guid>(nullable: false),
-                    TrapName = table.Column<string>(nullable: true),
-                    Color = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Trap", x => x.TrapID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -90,6 +41,121 @@ namespace Infrastructure.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(nullable: false),
+                    RoleId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(nullable: false),
+                    ClaimType = table.Column<string>(nullable: true),
+                    ClaimValue = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(nullable: false),
+                    ProviderKey = table.Column<string>(nullable: false),
+                    ProviderDisplayName = table.Column<string>(nullable: true),
+                    UserId = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(nullable: false),
+                    LoginProvider = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Value = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DefaultFacility",
+                columns: table => new
+                {
+                    FacilityFID = table.Column<Guid>(nullable: false),
+                    UserFID = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DefaultFacility", x => new { x.FacilityFID, x.UserFID });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Errand",
+                columns: table => new
+                {
+                    ErrandID = table.Column<Guid>(nullable: false),
+                    ModifiedAt = table.Column<DateTime>(nullable: false),
+                    ModifiedBy = table.Column<Guid>(nullable: false),
+                    FacilityFID = table.Column<Guid>(nullable: false),
+                    EmployeeFID = table.Column<Guid>(nullable: false),
+                    ProviderFID = table.Column<Guid>(nullable: false),
+                    OriginalDueDate = table.Column<DateTime>(nullable: false),
+                    DueDate = table.Column<DateTime>(nullable: false),
+                    CompleteDate = table.Column<DateTime>(nullable: true),
+                    Status = table.Column<byte>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    Report = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Errand", x => x.ErrandID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Facility",
+                columns: table => new
+                {
+                    FacilityID = table.Column<Guid>(nullable: false),
+                    ModifiedAt = table.Column<DateTime>(nullable: false),
+                    ModifiedBy = table.Column<Guid>(nullable: false),
+                    CompanyName = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    City = table.Column<string>(nullable: true),
+                    Address = table.Column<string>(nullable: true),
+                    SecurityCode = table.Column<string>(nullable: true),
+                    ProviderFID = table.Column<Guid>(nullable: false),
+                    ProviderId1 = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Facility", x => x.FacilityID);
                 });
 
             migrationBuilder.CreateTable(
@@ -114,7 +180,10 @@ namespace Infrastructure.Migrations
                     FacilityId = table.Column<Guid>(nullable: true),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    Location = table.Column<string>(nullable: true)
+                    Location = table.Column<string>(nullable: true),
+                    Available = table.Column<bool>(nullable: false),
+                    ProviderName = table.Column<string>(nullable: true),
+                    ProviderFID = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -124,6 +193,12 @@ namespace Infrastructure.Migrations
                         column: x => x.FacilityId,
                         principalTable: "Facility",
                         principalColumn: "FacilityID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_AspNetUsers_ProviderFID",
+                        column: x => x.ProviderFID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -153,6 +228,51 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Supplement",
+                columns: table => new
+                {
+                    SupplementID = table.Column<Guid>(nullable: false),
+                    ModifiedAt = table.Column<DateTime>(nullable: false),
+                    ModifiedBy = table.Column<Guid>(nullable: false),
+                    SupplementName = table.Column<string>(nullable: true),
+                    ExpirationDate = table.Column<DateTime>(nullable: false),
+                    CertificateFilePath = table.Column<string>(nullable: true),
+                    ProviderFID = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Supplement", x => x.SupplementID);
+                    table.ForeignKey(
+                        name: "FK_Supplement_AspNetUsers_ProviderFID",
+                        column: x => x.ProviderFID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Trap",
+                columns: table => new
+                {
+                    TrapID = table.Column<Guid>(nullable: false),
+                    ModifiedAt = table.Column<DateTime>(nullable: false),
+                    ModifiedBy = table.Column<Guid>(nullable: false),
+                    TrapName = table.Column<string>(nullable: true),
+                    Color = table.Column<string>(nullable: true),
+                    ProviderFID = table.Column<Guid>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Trap", x => x.TrapID);
+                    table.ForeignKey(
+                        name: "FK_Trap_AspNetUsers_ProviderFID",
+                        column: x => x.ProviderFID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Field",
                 columns: table => new
                 {
@@ -173,148 +293,6 @@ namespace Infrastructure.Migrations
                         column: x => x.TrapFID,
                         principalTable: "Trap",
                         principalColumn: "TrapID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserClaims",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<Guid>(nullable: false),
-                    ClaimType = table.Column<string>(nullable: true),
-                    ClaimValue = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserLogins",
-                columns: table => new
-                {
-                    LoginProvider = table.Column<string>(nullable: false),
-                    ProviderKey = table.Column<string>(nullable: false),
-                    ProviderDisplayName = table.Column<string>(nullable: true),
-                    UserId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserRoles",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(nullable: false),
-                    RoleId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserTokens",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(nullable: false),
-                    LoginProvider = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Value = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DefaultFacility",
-                columns: table => new
-                {
-                    FacilityFID = table.Column<Guid>(nullable: false),
-                    UserFID = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DefaultFacility", x => new { x.FacilityFID, x.UserFID });
-                    table.ForeignKey(
-                        name: "FK_DefaultFacility_Facility_FacilityFID",
-                        column: x => x.FacilityFID,
-                        principalTable: "Facility",
-                        principalColumn: "FacilityID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DefaultFacility_AspNetUsers_UserFID",
-                        column: x => x.UserFID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Errand",
-                columns: table => new
-                {
-                    ErrandID = table.Column<Guid>(nullable: false),
-                    ModifiedAt = table.Column<DateTime>(nullable: false),
-                    ModifiedBy = table.Column<Guid>(nullable: false),
-                    FacilityFID = table.Column<Guid>(nullable: false),
-                    EmployeeFID = table.Column<Guid>(nullable: false),
-                    OriginalDueDate = table.Column<DateTime>(nullable: false),
-                    DueDate = table.Column<DateTime>(nullable: false),
-                    CompleteDate = table.Column<DateTime>(nullable: true),
-                    Status = table.Column<byte>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    Report = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Errand", x => x.ErrandID);
-                    table.ForeignKey(
-                        name: "FK_Errand_AspNetUsers_EmployeeFID",
-                        column: x => x.EmployeeFID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Errand_Facility_FacilityFID",
-                        column: x => x.FacilityFID,
-                        principalTable: "Facility",
-                        principalColumn: "FacilityID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -455,6 +433,11 @@ namespace Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_ProviderFID",
+                table: "AspNetUsers",
+                column: "ProviderFID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DefaultFacility_UserFID",
                 table: "DefaultFacility",
                 column: "UserFID");
@@ -468,6 +451,16 @@ namespace Infrastructure.Migrations
                 name: "IX_Errand_FacilityFID",
                 table: "Errand",
                 column: "FacilityFID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Errand_ProviderFID",
+                table: "Errand",
+                column: "ProviderFID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Facility_ProviderId1",
+                table: "Facility",
+                column: "ProviderId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Field_TrapFID",
@@ -513,10 +506,104 @@ namespace Infrastructure.Migrations
                 name: "IX_PointReviewRecord_PointReviewFID",
                 table: "PointReviewRecord",
                 column: "PointReviewFID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Supplement_ProviderFID",
+                table: "Supplement",
+                column: "ProviderFID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Trap_ProviderFID",
+                table: "Trap",
+                column: "ProviderFID");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                table: "AspNetUserRoles",
+                column: "UserId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                table: "AspNetUserTokens",
+                column: "UserId",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DefaultFacility_AspNetUsers_UserFID",
+                table: "DefaultFacility",
+                column: "UserFID",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_DefaultFacility_Facility_FacilityFID",
+                table: "DefaultFacility",
+                column: "FacilityFID",
+                principalTable: "Facility",
+                principalColumn: "FacilityID",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Errand_AspNetUsers_EmployeeFID",
+                table: "Errand",
+                column: "EmployeeFID",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Errand_AspNetUsers_ProviderFID",
+                table: "Errand",
+                column: "ProviderFID",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Errand_Facility_FacilityFID",
+                table: "Errand",
+                column: "FacilityFID",
+                principalTable: "Facility",
+                principalColumn: "FacilityID",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Facility_AspNetUsers_ProviderId1",
+                table: "Facility",
+                column: "ProviderId1",
+                principalTable: "AspNetUsers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Facility_AspNetUsers_ProviderId1",
+                table: "Facility");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -554,9 +641,6 @@ namespace Infrastructure.Migrations
                 name: "Point");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "Perimeter");
 
             migrationBuilder.DropTable(
@@ -564,6 +648,9 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Trap");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Facility");

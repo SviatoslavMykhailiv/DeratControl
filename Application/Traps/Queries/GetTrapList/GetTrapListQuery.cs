@@ -1,4 +1,6 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
@@ -12,21 +14,26 @@ using System.Threading.Tasks;
 
 namespace Application.Traps.Queries.GetTrapList {
   public record GetTrapListQuery : IRequest<IEnumerable<TrapDto>> {
-    public class GetTrapListQueryHandler : IRequestHandler<GetTrapListQuery, IEnumerable<TrapDto>> {
-      private readonly IDeratControlDbContext context;
+    public class GetTrapListQueryHandler : BaseRequestHandler<GetTrapListQuery, IEnumerable<TrapDto>> {
+      private readonly IDeratControlDbContext db;
       private readonly IMemoryCache cache;
       private readonly IMapper mapper;
 
-      public GetTrapListQueryHandler(IDeratControlDbContext context, IMemoryCache cache, IMapper mapper) {
-        this.context = context;
+      public GetTrapListQueryHandler(
+        ICurrentDateService currentDateService, 
+        ICurrentUserProvider currentUserProvider,
+        IDeratControlDbContext db, 
+        IMemoryCache cache, 
+        IMapper mapper) : base(currentDateService, currentUserProvider) {
+        this.db = db;
         this.cache = cache;
         this.mapper = mapper;
       }
 
-      public async Task<IEnumerable<TrapDto>> Handle(GetTrapListQuery request, CancellationToken cancellationToken) {
-        var traps = await cache.GetOrCreateAsync(nameof(Trap), entry => {
-          return context
-          .Traps
+      protected override async Task<IEnumerable<TrapDto>> Handle(RequestContext context, GetTrapListQuery request, CancellationToken cancellationToken) {
+        var traps = await cache.GetOrCreateAsync($"{nameof(Trap)}-{context.CurrentUser.UserId}", entry => {
+          return db
+          .Traps.Where(t => t.ProviderId == context.CurrentUser.UserId)
           .Include(t => t.Fields)
           .AsNoTracking()
           .OrderBy(c => c.TrapName)

@@ -1,4 +1,6 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using Domain.Entities;
 using MediatR;
 using System;
@@ -14,23 +16,25 @@ namespace Application.Facilities.Commands.UpsertFacility {
     public string Address { get; init; }
     public string SecurityCode { get; init; }
 
-    public class UpsertFacilityCommandHandler : IRequestHandler<UpsertFacilityCommand, Guid> {
-      private readonly IDeratControlDbContext context;
+    public class UpsertFacilityCommandHandler : BaseRequestHandler<UpsertFacilityCommand, Guid> {
+      private readonly IDeratControlDbContext db;
 
-      public UpsertFacilityCommandHandler(IDeratControlDbContext context) {
-        this.context = context;
+      public UpsertFacilityCommandHandler(
+        ICurrentDateService currentDateService, 
+        ICurrentUserProvider currentUserProvider, 
+        IDeratControlDbContext db) : base(currentDateService, currentUserProvider) {
+        this.db = db;
       }
 
-      public async Task<Guid> Handle(UpsertFacilityCommand request, CancellationToken cancellationToken) {
-
+      protected override async Task<Guid> Handle(RequestContext context, UpsertFacilityCommand request, CancellationToken cancellationToken) {
         Facility facility;
 
         if (request.FacilityId.HasValue) {
-          facility = await context.Facilities.FindAsync(new object[] { request.FacilityId.Value }, cancellationToken);
+          facility = await db.Facilities.FindAsync(new object[] { request.FacilityId.Value }, cancellationToken);
         }
         else {
-          facility = new Facility();
-          context.Facilities.Add(facility);
+          facility = new Facility { ProviderId = context.CurrentUser.UserId };
+          db.Facilities.Add(facility);
         }
 
         facility.CompanyName = request.CompanyName;
@@ -39,7 +43,7 @@ namespace Application.Facilities.Commands.UpsertFacility {
         facility.SecurityCode = request.SecurityCode;
         facility.Address = request.Address;
 
-        await context.SaveChangesAsync(cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
 
         return facility.Id;
       }

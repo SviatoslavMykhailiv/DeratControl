@@ -1,6 +1,9 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -33,19 +36,24 @@ namespace Application.Users.Queries.GetAvailableEmployeeList {
     public DateTime? DueDate { get; init; }
     public Guid? ErrandId { get; init; }
 
-    public class GetAvailableEmployeeListQueryHandler : IRequestHandler<GetAvailableEmployeeListQuery, IEnumerable<UserDto>> {
+    public class GetAvailableEmployeeListQueryHandler : BaseRequestHandler<GetAvailableEmployeeListQuery, IEnumerable<UserDto>> {
       private readonly IUserManagerService userManagerService;
       private readonly IMapper mapper;
       private readonly IDeratControlDbContext db;
 
-      public GetAvailableEmployeeListQueryHandler(IUserManagerService userManagerService, IMapper mapper, IDeratControlDbContext db) {
+      public GetAvailableEmployeeListQueryHandler(
+        ICurrentDateService currentDateService, 
+        ICurrentUserProvider currentUserProvider,
+        IUserManagerService userManagerService, 
+        IMapper mapper, 
+        IDeratControlDbContext db) : base(currentDateService, currentUserProvider) {
         this.userManagerService = userManagerService;
         this.mapper = mapper;
         this.db = db;
       }
 
-      public async Task<IEnumerable<UserDto>> Handle(GetAvailableEmployeeListQuery request, CancellationToken cancellationToken) {
-        var employeeList = (await userManagerService.GetEmployeeList(false, cancellationToken)).ToList();
+      protected override async Task<IEnumerable<UserDto>> Handle(RequestContext context, GetAvailableEmployeeListQuery request, CancellationToken cancellationToken) {
+        var employeeList = (await userManagerService.GetEmployeeList(context.CurrentUser.UserId, false, cancellationToken)).ToList();
         var busyEmployees = new HashSet<Guid>();
 
         if (request.FacilityId.HasValue && request.DueDate.HasValue) {

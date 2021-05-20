@@ -1,4 +1,6 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Common;
+using Application.Common.Interfaces;
+using Application.Common.Models;
 using Domain.Entities;
 using Domain.ValueObjects;
 using MediatR;
@@ -15,43 +17,48 @@ namespace Application.Supplements.Commands.UpsertSupplement {
     public DateTime ExpirationDate { get; init; }
     public string Certificate { get; init; }
 
-    public class UpsertSupplementCommandHandler : IRequestHandler<UpsertSupplementCommand, Guid> {
-      private readonly IDeratControlDbContext context;
+    public class UpsertSupplementCommandHandler : BaseRequestHandler<UpsertSupplementCommand, Guid> {
+      private readonly IDeratControlDbContext db;
       private readonly IFileStorage fileStorage;
       private readonly IMemoryCache cache;
 
-      public UpsertSupplementCommandHandler(IDeratControlDbContext context, IFileStorage fileStorage, IMemoryCache cache) {
-        this.context = context;
+      public UpsertSupplementCommandHandler(
+        ICurrentDateService currentDateService,
+        ICurrentUserProvider currentUserProvider,
+        IDeratControlDbContext db,
+        IFileStorage fileStorage,
+        IMemoryCache cache) : base(currentDateService, currentUserProvider) {
+        this.db = db;
         this.fileStorage = fileStorage;
         this.cache = cache;
       }
 
-      public async Task<Guid> Handle(UpsertSupplementCommand request, CancellationToken cancellationToken) {
+      protected override async Task<Guid> Handle(RequestContext context, UpsertSupplementCommand request, CancellationToken cancellationToken) {
         Supplement supplement;
 
         if (request.SupplementId.HasValue) {
-          supplement = await context
+          supplement = await db
             .Supplements
             .FirstOrDefaultAsync(s => s.Id == request.SupplementId.Value, cancellationToken);
         }
         else {
-          supplement = new Supplement();
-          context.Supplements.Add(supplement);
+          supplement = new Supplement { ProviderId = context.CurrentUser.UserId };
+          db.Supplements.Add(supplement);
         }
 
         var image = (Image)request.Certificate;
 
         supplement.ExpirationDate = request.ExpirationDate;
         supplement.SupplementName = request.SupplementName;
-        
-        if(image is not null) {
+
+        if (image is not null) {
           supplement.GeneratePath(image.Format);
           await fileStorage.SaveFile(supplement.CertificateFilePath, image);
         }
-       
-        await context.SaveChangesAsync(cancellationToken);
-        
-        cache.Remove(nameof(Supplement));
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        cache.Remove($"{nameof(Supplement)}-{context.CurrentUser.UserId}");
 
         return supplement.Id;
       }

@@ -16,6 +16,9 @@ namespace Domain.Entities {
     public string Address { get; set; }
     public string SecurityCode { get; set; }
 
+    public Guid ProviderId { get; set; }
+    public IUser Provider { get; set; }
+
     public IEnumerable<Perimeter> Perimeters => perimeters;
     public IEnumerable<IUser> Users => users;
 

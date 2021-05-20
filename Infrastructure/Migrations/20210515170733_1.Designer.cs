@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DeratControlDbContext))]
-    [Migration("20210514112648_2")]
-    partial class _2
+    [Migration("20210515170733_1")]
+    partial class _1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -71,6 +71,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("OriginalDueDate")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnName("ProviderFID")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Report")
                         .HasColumnType("text");
 
@@ -82,6 +86,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("EmployeeId");
 
                     b.HasIndex("FacilityId");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("Errand");
                 });
@@ -111,10 +117,19 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnName("ProviderFID")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ProviderId1")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("SecurityCode")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProviderId1");
 
                     b.ToTable("Facility");
                 });
@@ -327,10 +342,16 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnName("ProviderFID")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("SupplementName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("Supplement");
                 });
@@ -351,10 +372,16 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("ModifiedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnName("ProviderFID")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TrapName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("Trap");
                 });
@@ -444,6 +471,13 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("ProviderId")
+                        .HasColumnName("ProviderFID")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProviderName")
+                        .HasColumnType("text");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -464,6 +498,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasName("UserNameIndex");
+
+                    b.HasIndex("ProviderId");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -597,6 +633,19 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("FacilityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Facility", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId1");
                 });
 
             modelBuilder.Entity("Domain.Entities.Field", b =>
@@ -668,11 +717,33 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Entities.Supplement", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Trap", b =>
+                {
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.HasOne("Domain.Entities.Facility", "Facility")
                         .WithMany("Users")
                         .HasForeignKey("FacilityId");
+
+                    b.HasOne("Infrastructure.Identity.ApplicationUser", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

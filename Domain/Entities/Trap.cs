@@ -11,6 +11,9 @@ namespace Domain.Entities {
     public string TrapName { get; set; }
     public string Color { get; set; }
 
+    public Guid ProviderId { get; set; }
+    public IUser Provider { get; set; }
+
     public IEnumerable<Field> Fields => fields;
 
     public override string ToString() {

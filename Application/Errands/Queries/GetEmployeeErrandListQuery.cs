@@ -1,8 +1,6 @@
 ﻿using Application.Common;
 using Application.Common.Interfaces;
 using Application.Common.Models;
-using Application.Errands.Commands.MoveErrand;
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Domain.Enums;
@@ -10,46 +8,47 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using AutoMapper.QueryableExtensions;
-using System;
+using Domain.Entities;
 
-namespace Application.Errands.Queries
-{
-    public record GetEmployeeErrandListQuery : IRequest<IEnumerable<ErrandDto>>
-    {
+namespace Application.Errands.Queries {
+  public record GetEmployeeErrandListQuery : IRequest<IEnumerable<ErrandDto>> {
 
-        public class GetEmployeeErrandListQueryHandler : BaseRequestHandler<GetEmployeeErrandListQuery, IEnumerable<ErrandDto>>
-        {
-            private readonly IDeratControlDbContext db;
-            private readonly IMapper mapper;
-            private readonly IMediator mediator;
+    public class GetEmployeeErrandListQueryHandler : BaseRequestHandler<GetEmployeeErrandListQuery, IEnumerable<ErrandDto>> {
+      private readonly IDeratControlDbContext db;
 
-            public GetEmployeeErrandListQueryHandler(
-              IDeratControlDbContext db,
-              IMapper mapper,
-              ICurrentDateService currentDateService,
-              ICurrentUserProvider currentUserProvider,
-              IMediator mediator) : base(currentDateService, currentUserProvider)
-            {
-                this.db = db;
-                this.mapper = mapper;
-                this.mediator = mediator;
-            }
+      public GetEmployeeErrandListQueryHandler(
+        IDeratControlDbContext db,
+        ICurrentDateService currentDateService,
+        ICurrentUserProvider currentUserProvider) : base(currentDateService, currentUserProvider) {
+        this.db = db;
+      }
 
-            protected override async Task<IEnumerable<ErrandDto>> Handle(RequestContext context, GetEmployeeErrandListQuery request, CancellationToken cancellationToken)
-            {
-                var errands = await db.Errands
-                  .Where(e => e.EmployeeId == context.CurrentUser.UserId && e.Status != ErrandStatus.Finished)
-                  .AsNoTracking()
-                  .ProjectTo<ErrandDto>(mapper.ConfigurationProvider)
-                  .ToListAsync(cancellationToken: cancellationToken);
+      protected override async Task<IEnumerable<ErrandDto>> Handle(RequestContext context, GetEmployeeErrandListQuery request, CancellationToken cancellationToken) {
+        var errands = await GetErrandsQuery(context.CurrentUser).ToListAsync(cancellationToken: cancellationToken);
 
-                foreach (var errand in errands.Where(e => Convert.ToDateTime(e.DueDate).Date < context.CurrentDateTime.Date))
-                    await mediator.Send(new MoveErrandCommand { ErrandId = errand.ErrandId }, cancellationToken);
+        foreach (var errand in errands)
+          errand.MoveDueDate(context.CurrentDateTime);
 
-                return errands.Select(e => mapper.Map<ErrandDto>(e)).ToList();
-            }
-        }
+        await db.SaveChangesAsync(cancellationToken);
 
+        return errands.Select(e => ErrandDto.Map(e, context.CurrentUser));
+      }
+
+      private IQueryable<Errand> GetErrandsQuery(CurrentUser user) {
+        return db
+          .Errands
+          .Include(e => e.Employee)
+          .Include(e => e.Facility)
+          .ThenInclude(f => f.Perimeters)
+          .ThenInclude(p => p.Points)
+          .ThenInclude(p => p.Trap)
+          .Include(e => e.Points)
+          .ThenInclude(e => e.Records)
+          .ThenInclude(r => r.Field)
+          .Where(e => e.EmployeeId == user.UserId && e.Status == ErrandStatus.Planned)
+          .OrderByDescending(e => e.DueDate);
+      }
     }
+
+  }
 }
