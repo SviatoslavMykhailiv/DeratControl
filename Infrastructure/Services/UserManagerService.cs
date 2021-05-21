@@ -51,6 +51,7 @@ namespace Infrastructure.Services {
           PhoneNumber = userModel.PhoneNumber,
           Facility = facility,
           Location = userModel.Location,
+          Available = true,
           SecurityStamp = Guid.NewGuid().ToString(),
           DefaultFacilities = defaultFacilities.Select(f => new DefaultFacility { Facility = f, User = user }).ToList()
         };
