@@ -106,7 +106,7 @@ namespace Domain.Entities {
       AssertErrandNotFinished();
 
       if (IsOverdue(currentDate))
-        DueDate = currentDate.AddDays(1).Date;
+        DueDate = currentDate.Date;
     }
 
     public void Complete(DateTime completeDate, string report) {

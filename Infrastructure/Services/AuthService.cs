@@ -25,6 +25,8 @@ namespace Infrastructure.Services {
     public const string USER_ROLE_CLAIM = "derat-user-role";
     public const string USER_NAME_CLAIM = "derat-user-name";
     public const string FACILITY_ID_CLAIM = "derat-facility-id";
+    public const string USER_FIRST_NAME_CLAIM = "derat-user-first-name";
+    public const string USER_LAST_NAME_CLAIM = "derat-user-last-name";
 
     private readonly UserManager<ApplicationUser> userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
@@ -51,7 +53,9 @@ namespace Infrastructure.Services {
       var claims = new List<Claim> {
         new Claim(USER_ID_CLAIM, user.Id.ToString()),
         new Claim(USER_ROLE_CLAIM, userRole.First()),
-        new Claim(USER_NAME_CLAIM, userName) };
+        new Claim(USER_NAME_CLAIM, userName),
+        new Claim(USER_FIRST_NAME_CLAIM, user.FirstName),
+        new Claim(USER_LAST_NAME_CLAIM, user.LastName) };
 
       if (user.FacilityId.HasValue)
         claims.Add(new Claim(FACILITY_ID_CLAIM, user.FacilityId.Value.ToString()));
