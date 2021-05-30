@@ -63,8 +63,7 @@ namespace Application.Errands.Commands.UpsertErrand {
         if (request.DueDate.Date < context.CurrentDateTime.Date)
           throw new BadRequestException();
 
-        if (errand.EmployeeId != request.EmployeeId)
-          errand.Employee = await userManagerService.GetUser(request.EmployeeId, cancellationToken) ?? throw new NotFoundException();
+        errand.EmployeeId = request.EmployeeId;
 
         if (errand.FacilityId != request.FacilityId)
           errand.Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException();

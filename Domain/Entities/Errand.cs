@@ -28,7 +28,7 @@ namespace Domain.Entities {
     }
 
     public Guid FacilityId { get; init; }
-    public Guid EmployeeId { get; init; }
+    public Guid EmployeeId { get; set; }
 
     public Guid ProviderId { get; set; }
     public IUser Provider { get; set; }
