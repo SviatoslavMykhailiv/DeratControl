@@ -25,7 +25,7 @@ namespace Domain.Entities {
       string fieldName,
       int order,
       FieldType type,
-      string optionList) {
+      string[] optionList) {
 
       if (fieldId is null)
         AddField(fieldName, order, type, optionList);
@@ -46,7 +46,7 @@ namespace Domain.Entities {
       string fieldName,
       int order,
       FieldType type,
-      string optionList) {
+      string[] optionList) {
 
       if (fields.Any(f => string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase)))
         throw new InvalidOperationException($"Field with name {fieldName} already exists.");
@@ -58,7 +58,7 @@ namespace Domain.Entities {
         FieldName = fieldName,
         Order = order,
         FieldType = type,
-        OptionList = optionList
+        OptionList = string.Join(';', optionList)
       };
 
       fields.Add(field);
@@ -69,7 +69,7 @@ namespace Domain.Entities {
       string fieldName,
       int order,
       FieldType type,
-      string optionList) {
+      string[] optionList) {
 
       if (fields.Any(f => string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase) && f.Id != fieldId))
         throw new InvalidOperationException($"Field with name {fieldName} already exists.");
@@ -82,7 +82,7 @@ namespace Domain.Entities {
       field.FieldName = fieldName;
       field.Order = order;
       field.FieldType = type;
-      field.OptionList = optionList;
+      field.OptionList = string.Join(';', optionList);
     }
   }
 }

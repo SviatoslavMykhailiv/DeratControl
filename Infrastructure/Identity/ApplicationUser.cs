@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace Infrastructure.Identity {
     public string ProviderName { get; set; }
     public Guid? ProviderId { get; set; }
     public IUser Provider { get; set; }
+    public Device Device { get; set; }
 
     public string GetFullName() => $"{LastName}, {FirstName}";
 

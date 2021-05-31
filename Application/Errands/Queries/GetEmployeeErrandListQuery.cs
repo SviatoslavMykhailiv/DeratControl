@@ -41,6 +41,7 @@ namespace Application.Errands.Queries {
           .ThenInclude(f => f.Trap)
           .Where(e => e.EmployeeId == user.UserId && e.Status == ErrandStatus.Planned)
           .OrderByDescending(e => e.DueDate)
+          .Take(5)
           .AsNoTracking();
       }
     }

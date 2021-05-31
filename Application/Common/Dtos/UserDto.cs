@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
 
 namespace Application.Common.Dtos {
@@ -13,5 +14,6 @@ namespace Application.Common.Dtos {
     public string Location { get; init; }
     public string Role { get; init; }
     public IReadOnlyCollection<Guid> Facilities { get; init; } = new List<Guid>();
+    public Device Device { get; init; }
   }
 }

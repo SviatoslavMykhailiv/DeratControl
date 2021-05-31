@@ -50,6 +50,7 @@ namespace Infrastructure.Services {
           Facility = facility,
           Location = userModel.Location,
           Available = true,
+          Device = userModel.Device,
           SecurityStamp = Guid.NewGuid().ToString(),
           DefaultFacilities = defaultFacilities.Select(f => new DefaultFacility { Facility = f }).ToList()
         };
@@ -69,6 +70,7 @@ namespace Infrastructure.Services {
         user.PhoneNumber = userModel.PhoneNumber;
         user.Facility = facility;
         user.Location = userModel.Location;
+        user.Device = userModel.Device;
         user.DefaultFacilities = defaultFacilities.Select(f => new DefaultFacility { Facility = f }).ToList();
 
         await userManager.UpdateAsync(user);

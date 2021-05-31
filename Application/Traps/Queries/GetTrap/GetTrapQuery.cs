@@ -52,7 +52,7 @@ namespace Application.Traps.Queries.GetTrap
                     .Traps
                     .Include(t => t.Fields)
                     .ProjectTo<TrapDto>(mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(t => t.TrapId == request.TrapId) ?? throw new NotFoundException();
+                    .FirstOrDefaultAsync(t => t.TrapId == request.TrapId, cancellationToken: cancellationToken) ?? throw new NotFoundException();
                 }
 
                 return cached.Find(c => c.TrapId == request.TrapId);

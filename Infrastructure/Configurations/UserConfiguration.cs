@@ -7,6 +7,11 @@ namespace Infrastructure.Configurations {
     public void Configure(EntityTypeBuilder<ApplicationUser> builder) {
       builder.HasOne(e => (ApplicationUser)e.Provider);
       builder.Property(c => c.ProviderId).HasColumnName("ProviderFID");
+
+      builder.OwnsOne(c => c.Device, o => {
+        o.Property(p => p.DeviceIdentifier).HasColumnName("DeviceIdentifier");
+        o.Property(p => p.DeviceType).HasColumnName("DeviceType");
+      });
     }
   }
 }

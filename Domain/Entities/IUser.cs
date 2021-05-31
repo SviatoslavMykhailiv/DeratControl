@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
 
 namespace Domain.Entities {
@@ -19,5 +20,6 @@ namespace Domain.Entities {
     bool Available { get; set; }
     string GetFullName();
     bool HasDefaultFacility(Guid facilityId);
+    Device Device { get; set; }
   }
 }
