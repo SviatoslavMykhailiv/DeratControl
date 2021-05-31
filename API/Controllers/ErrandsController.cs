@@ -18,7 +18,7 @@ namespace API.Controllers {
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpPost]
     public async Task<IActionResult> Upsert(
-      [FromBody] UpsertErrandCommand command, 
+      [FromBody] UpsertErrandCommand command,
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
@@ -28,14 +28,14 @@ namespace API.Controllers {
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
     [HttpGet("history")]
     public async Task<IActionResult> GetHistoryList(
-      [FromQuery]Guid? facilityId, 
-      [FromQuery]Guid? employeeId, 
+      [FromQuery] Guid? facilityId,
+      [FromQuery] Guid? employeeId,
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandHistoryQuery(facilityId, employeeId), cancellationToken));
 
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,EMPLOYEE")]
     [HttpGet("{errandId}")]
     public async Task<IActionResult> Get(
-      [FromRoute]Guid errandId, 
+      [FromRoute] Guid errandId,
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new GetErrandQuery(errandId), cancellationToken));
 
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER,CUSTOMER")]
@@ -47,13 +47,13 @@ namespace API.Controllers {
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "EMPLOYEE,PROVIDER")]
     [HttpPost("complete")]
     public async Task<IActionResult> Complete(
-      [FromBody] CompleteErrandCommand command, 
+      [FromBody] CompleteErrandCommand command,
       CancellationToken cancellationToken) => Ok(await Mediator.Send(command, cancellationToken));
 
     [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
     [HttpDelete("{errandId}")]
     public async Task<IActionResult> Delete(
-      [FromRoute]Guid errandId, 
+      [FromRoute] Guid errandId,
       CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteErrandCommand(errandId), cancellationToken));
   }
 }

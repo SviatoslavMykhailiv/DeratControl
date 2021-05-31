@@ -28,14 +28,7 @@ namespace Application.Errands.Queries {
       protected override async Task<IEnumerable<ErrandDto>> Handle(RequestContext context, GetErrandListQuery request, CancellationToken cancellationToken) {
         if (context.CurrentUser.Role == UserRole.Employee)
           return await mediator.Send(new GetEmployeeErrandListQuery(), cancellationToken);
-
-        var errands = await GetErrandsQuery().ToListAsync(cancellationToken: cancellationToken);
-
-        foreach (var errand in errands.Where(e => e.Status != ErrandStatus.Finished))
-          errand.MoveDueDate(context.CurrentDateTime);
-        
-        await db.SaveChangesAsync(cancellationToken);
-        
+        var errands = await GetErrandsQuery().ToListAsync(cancellationToken: cancellationToken);        
         return errands.Select(e => ErrandDto.Map(e, context.CurrentUser));
       }
 
@@ -46,11 +39,12 @@ namespace Application.Errands.Queries {
           .Include(e => e.Facility)
           .ThenInclude(f => f.Perimeters)
           .ThenInclude(p => p.Points)
-          .ThenInclude(p => p.Trap)
-          .Include(e => e.Points)
-          .ThenInclude(e => e.Records)
+          .ThenInclude(p => p.Reviews)
+          .ThenInclude(p => p.Records)
           .ThenInclude(r => r.Field)
-          .OrderByDescending(e => e.DueDate);
+          .ThenInclude(f => f.Trap)
+          .OrderByDescending(e => e.DueDate)
+          .AsNoTracking();
       }
     }
   }

@@ -25,12 +25,6 @@ namespace Application.Errands.Queries {
 
       protected override async Task<IEnumerable<ErrandDto>> Handle(RequestContext context, GetEmployeeErrandListQuery request, CancellationToken cancellationToken) {
         var errands = await GetErrandsQuery(context.CurrentUser).ToListAsync(cancellationToken: cancellationToken);
-
-        foreach (var errand in errands)
-          errand.MoveDueDate(context.CurrentDateTime);
-
-        await db.SaveChangesAsync(cancellationToken);
-
         return errands.Select(e => ErrandDto.Map(e, context.CurrentUser));
       }
 
@@ -41,12 +35,13 @@ namespace Application.Errands.Queries {
           .Include(e => e.Facility)
           .ThenInclude(f => f.Perimeters)
           .ThenInclude(p => p.Points)
-          .ThenInclude(p => p.Trap)
-          .Include(e => e.Points)
-          .ThenInclude(e => e.Records)
+          .ThenInclude(p => p.Reviews)
+          .ThenInclude(p => p.Records)
           .ThenInclude(r => r.Field)
+          .ThenInclude(f => f.Trap)
           .Where(e => e.EmployeeId == user.UserId && e.Status == ErrandStatus.Planned)
-          .OrderByDescending(e => e.DueDate);
+          .OrderByDescending(e => e.DueDate)
+          .AsNoTracking();
       }
     }
 
