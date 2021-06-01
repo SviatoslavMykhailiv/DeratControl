@@ -31,7 +31,7 @@ namespace Application.Facilities.Queries.GetFacilityList {
           UserRole.Employee => (from facility in db.Facilities.AsNoTracking()
                                 join errand in db.Errands.AsNoTracking()
                                 on facility.Id equals errand.FacilityId
-                                where errand.EmployeeId == context.CurrentUser.UserId && errand.Status == ErrandStatus.Planned
+                                where errand.EmployeeId == context.CurrentUser.UserId
                                 select facility).Distinct(),
           UserRole.Customer => db.Facilities.AsNoTracking().Where(f => f.Id == context.CurrentUser.FacilityId.Value),
           _ => db.Facilities.AsNoTracking().AsQueryable(),

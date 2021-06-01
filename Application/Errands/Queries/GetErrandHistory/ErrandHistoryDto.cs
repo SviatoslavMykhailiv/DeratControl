@@ -15,9 +15,7 @@ namespace Application.Errands.Queries.GetErrandHistory {
     public static ErrandHistoryDto Map(Errand errand) {
       return new ErrandHistoryDto {
         Description = errand.Description,
-        Report = errand.Report,
         DueDate = errand.DueDate.ToString("d"),
-        CompleteDate = errand.CompleteDate.Value.ToString("d"),
         EmployeeName = errand.Employee.GetFullName(),
         FacilityName = errand.Facility.CompanyName,
         Points = errand.Points.Select(p => new PointReviewHistoryDto {
@@ -25,7 +23,6 @@ namespace Application.Errands.Queries.GetErrandHistory {
           TrapName = p.Point.Trap.TrapName,
           SupplementName = p.Point.Supplement.SupplementName,
           PerimeterName = p.Point.Perimeter.PerimeterName,
-          Status = p.Status.ToString()
         }).ToList()
       };
     }

@@ -48,7 +48,7 @@ namespace Application.Errands.Queries.GetErrandHistory {
           .ThenInclude(p => p.Points)
           .ThenInclude(p => p.Supplement)
           .Include(p => p.Points)
-          .ThenInclude(p => p.Point.Trap).Where(e => e.Status == Domain.Enums.ErrandStatus.Finished);
+          .ThenInclude(p => p.Point.Trap);
       }
     }
   }

@@ -2,15 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Configurations {
-  public class PointReviewConfiguration : BaseEntityTypeConfiguration<PointReview> {
-    public override void Configure(EntityTypeBuilder<PointReview> builder) {
-      base.Configure(builder);
+namespace Infrastructure.Configurations
+{
+    public class PointReviewConfiguration : IEntityTypeConfiguration<PointReview>
+    {
+        public void Configure(EntityTypeBuilder<PointReview> builder)
+        {
+            builder.ToTable(typeof(PointReview).Name);
+            builder.HasKey(c => new { c.ErrandId, c.PointId });
 
-      builder.Property(c => c.ErrandId).HasColumnName("ErrandFID");
-      builder.Property(c => c.PointId).HasColumnName("PointFID");
-
-      builder.HasMany(p => p.Records).WithOne(r => r.PointReview).OnDelete(DeleteBehavior.Cascade);
+            builder.Property(c => c.ErrandId).HasColumnName("ErrandFID");
+            builder.Property(c => c.PointId).HasColumnName("PointFID");
+        }
     }
-  }
 }

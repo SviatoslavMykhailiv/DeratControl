@@ -1,38 +1,39 @@
 ﻿using Domain.Common;
 using Domain.Enums;
 using System;
-using System.Linq;
 
-namespace Domain.Entities {
-  public class PointReviewRecord : AuditableEntity {
+namespace Domain.Entities
+{
+    public class PointReviewRecord : AuditableEntity
+    {
+        private string value;
 
-    private string value;
+        public Guid PointReviewId { get; init; }
+        public Guid FieldId { get; init; }
 
-    public Guid PointReviewId { get; init; }
-    public Guid FieldId { get; init; }
+        public string Value
+        {
+            get => value;
 
-    public string Value {
-      get => value;
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    return;
 
-      set {
-        if (string.IsNullOrWhiteSpace(value))
-          return;
+                if (Field.FieldType == FieldType.Numeric && int.TryParse(value, out _) == false)
+                    throw new InvalidOperationException("Value must be a number.");
 
-        if (Field.FieldType == FieldType.Numeric && int.TryParse(value, out _) == false)
-          throw new InvalidOperationException("Value must be a number.");
-        
-        if (Field.FieldType == FieldType.Option) {
-          var options = Field.OptionList.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim());
+                if (Field.IsOptionType)
+                {
+                    if (Field.ContainsOption(value) == false)
+                        throw new InvalidOperationException("Value does't exist in option list.");
+                }
 
-          if (options.Contains(value) == false)
-            throw new InvalidOperationException("Value does't exist in option list.");
+                this.value = value;
+            }
         }
 
-        this.value = value;
-      }
+        public CompletedPointReview PointReview { get; init; }
+        public Field Field { get; init; }
     }
-
-    public PointReview PointReview { get; init; }
-    public Field Field { get; init; }
-  }
 }

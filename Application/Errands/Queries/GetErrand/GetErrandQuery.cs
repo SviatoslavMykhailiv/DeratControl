@@ -46,11 +46,10 @@ namespace Application.Errands.Queries.GetErrand {
           .Include(e => e.Employee)
           .Include(e => e.Facility)
           .ThenInclude(f => f.Perimeters)
-          .ThenInclude(p => p.Points)
-          .ThenInclude(p => p.Trap)
-          .Include(e => e.Points)
-          .ThenInclude(e => e.Records)
-          .ThenInclude(r => r.Field)
+          .Include(p => p.Points)
+          .ThenInclude(p => p.Point)
+          .ThenInclude(f => f.Trap)
+          .ThenInclude(r => r.Fields)
           .FirstOrDefaultAsync(e => e.Id == errandId);
       }
     }

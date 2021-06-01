@@ -1,7 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Entities;
-using Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,14 +18,15 @@ namespace Application.Errands.Queries
         public string City { get; init; }
         public string Address { get; init; }
         public string DueDate { get; init; }
-        public string CompleteDate { get; init; }
-        public short Status { get; init; }
         public int DaysOverdue { get; init; }
+        public bool OnDemand { get; init; }
 
         public ICollection<PointReviewDto> Points { get; init; } = new List<PointReviewDto>();
 
         public static ErrandDto Map(Errand errand, CurrentUser currentUser)
         {
+            var perimeters = errand.Facility.Perimeters.ToDictionary(p => p.Id);
+
             return new ErrandDto
             {
                 ErrandId = errand.Id,
@@ -37,27 +37,24 @@ namespace Application.Errands.Queries
                 EmployeeName = errand.Employee.GetFullName(),
                 City = errand.Facility.City,
                 Address = errand.Facility.Address,
+                OnDemand = errand.OnDemand,
                 DueDate = errand.DueDate.ToString("d"),
-                CompleteDate = errand.CompleteDate == null ? string.Empty : errand.CompleteDate.Value.ToString("d"),
-                Status = errand.GetDaysOverdue() > 0 && currentUser.Role == UserRole.Provider ?
-              (short)ErrandStatus.Overdue :
-              (short)errand.Status,
                 DaysOverdue = currentUser.Role == UserRole.Employee ? 0 : errand.GetDaysOverdue(),
                 Points = errand.Points.Select(p => new PointReviewDto
                 {
                     PointId = p.PointId,
                     PerimeterId = p.Point.PerimeterId,
-                    PerimeterName = p.Point.Perimeter.PerimeterName,
+                    PerimeterName = perimeters[p.Point.PerimeterId].PerimeterName,
                     Order = p.Point.Order,
                     TrapId = p.Point.TrapId,
                     TrapName = p.Point.Trap.TrapName,
-                    Records = p.Records.Select(r => new PointReviewRecordDto
+                    TrapColor = p.Point.Trap.Color,
+                    Records = p.Point.Trap.Fields.Select(r => new PointReviewRecordDto
                     {
-                        RecordId = r.Id,
-                        FieldName = r.Field.FieldName,
-                        Value = r.Value,
-                        FieldType = r.Field.FieldType,
-                        OptionList = r.Field.OptionList
+                        FieldId = r.Id,
+                        FieldName = r.FieldName,
+                        FieldType = r.FieldType,
+                        OptionList = r.OptionList.ToArray()
                     }).ToList()
                 }).OrderBy(o => o.Order).ToList()
             };

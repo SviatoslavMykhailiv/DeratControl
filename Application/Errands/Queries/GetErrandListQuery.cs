@@ -38,11 +38,10 @@ namespace Application.Errands.Queries {
           .Include(e => e.Employee)
           .Include(e => e.Facility)
           .ThenInclude(f => f.Perimeters)
-          .ThenInclude(p => p.Points)
-          .ThenInclude(p => p.Reviews)
-          .ThenInclude(p => p.Records)
-          .ThenInclude(r => r.Field)
+          .Include(p => p.Points)
+          .ThenInclude(p => p.Point)
           .ThenInclude(f => f.Trap)
+          .ThenInclude(r => r.Fields)
           .OrderByDescending(e => e.DueDate)
           .AsNoTracking();
       }

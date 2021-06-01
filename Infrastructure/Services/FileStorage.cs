@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -46,6 +47,9 @@ namespace Infrastructure.Services
 
         public Task SaveFile(string path, byte[] file)
         {
+            if (file is null)
+                throw new ArgumentNullException(nameof(file));
+
             var sections = path.Split(Path.DirectorySeparatorChar);
             var fileName = sections[^1];
 

@@ -1,35 +1,35 @@
 ﻿using Domain.Common;
 using Domain.Enums;
+using Domain.ValueObjects;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace Domain.Entities {
-  public class Field : AuditableEntity {
+namespace Domain.Entities
+{
+    public class Field : AuditableEntity
+    {
+        public static readonly HashSet<FieldType> OptionTypes = new HashSet<FieldType>
+        {
+            FieldType.Option,
+            FieldType.Percent
+        };
 
-    private string optionList;
-    private FieldType type;
+        public bool IsOptionType => OptionTypes.Contains(FieldType);
 
-    public Guid TrapId { get; init; }
-    public string FieldName { get; set; }
-    public int Order { get; set; }
+        public Guid TrapId { get; init; }
+        public string FieldName { get; set; }
+        public int Order { get; set; }
 
-    public FieldType FieldType {
-      get => type;
-      set {
-        if (value != FieldType.Option)
-          optionList = string.Empty;
+        public FieldType FieldType { get; set; }
 
-        type = value;
-      }
+        public Trap Trap { get; init; }
+
+        public IEnumerable<Option> OptionList { get; set; } = new HashSet<Option>();
+
+        public bool ContainsOption(string option)
+        {
+            return OptionList.Any(c => c.Value == option);
+        }
     }
-
-    public Trap Trap { get; init; }
-    
-    public string OptionList {
-      get => optionList;
-      set {
-        if (type == FieldType.Option)
-          optionList = value;
-      }
-    }
-  }
 }

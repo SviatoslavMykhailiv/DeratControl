@@ -12,57 +12,67 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Infrastructure {
-  public class DeratControlDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IDeratControlDbContext {
-    public static readonly LoggerFactory _myLoggerFactory =
-    new LoggerFactory(new[] {
+namespace Infrastructure
+{
+    public class DeratControlDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IDeratControlDbContext
+    {
+        public static readonly LoggerFactory _myLoggerFactory =
+        new LoggerFactory(new[] {
         new DebugLoggerProvider()
-    });
+        });
 
-    private readonly ICurrentDateService currentDateService;
+        private readonly ICurrentDateService currentDateService;
 
-    public DeratControlDbContext(
-      DbContextOptions<DeratControlDbContext> options,
-      ICurrentDateService currentDateService,
-      ICurrentUserProvider currentUserProvider) : base(options) {
-      this.currentDateService = currentDateService;
-      User = currentUserProvider?.User;
-    }
-
-    public DbSet<Facility> Facilities { get; set; }
-
-    public DbSet<Perimeter> Perimeters { get; set; }
-
-    public DbSet<Errand> Errands { get; set; }
-
-    public DbSet<Trap> Traps { get; set; }
-
-    public DbSet<Supplement> Supplements { get; set; }
-
-    public CurrentUser User { get; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder) {
-
-      base.OnModelCreating(modelBuilder);
-      modelBuilder.ApplyConfigurationsFromAssembly(typeof(DeratControlDbContext).Assembly);
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-      optionsBuilder.UseLoggerFactory(_myLoggerFactory);
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) {
-      foreach (var entry in ChangeTracker.Entries<AuditableEntity>()) {
-        switch (entry.State) {
-          case EntityState.Added:
-          case EntityState.Modified:
-            entry.Entity.ModifiedBy = User.UserId;
-            entry.Entity.ModifiedAt = currentDateService.CurrentDate;
-            break;
+        public DeratControlDbContext(
+          DbContextOptions<DeratControlDbContext> options,
+          ICurrentDateService currentDateService,
+          ICurrentUserProvider currentUserProvider) : base(options)
+        {
+            this.currentDateService = currentDateService;
+            User = currentUserProvider?.User;
         }
-      }
 
-      return base.SaveChangesAsync(cancellationToken);
+        public DbSet<Facility> Facilities { get; set; }
+
+        public DbSet<Perimeter> Perimeters { get; set; }
+
+        public DbSet<Errand> Errands { get; set; }
+
+        public DbSet<Trap> Traps { get; set; }
+
+        public DbSet<Supplement> Supplements { get; set; }
+
+        public CurrentUser User { get; }
+
+        public DbSet<CompletedErrand> CompletedErrands { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(DeratControlDbContext).Assembly);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLoggerFactory(_myLoggerFactory);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+            {
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                    case EntityState.Modified:
+                        entry.Entity.ModifiedBy = User.UserId;
+                        entry.Entity.ModifiedAt = currentDateService.CurrentDate;
+                        break;
+                }
+            }
+
+            return base.SaveChangesAsync(cancellationToken);
+        }
     }
-  }
 }

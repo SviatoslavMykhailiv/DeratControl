@@ -2,6 +2,8 @@
   public enum FieldType {
     String,
     Numeric,
-    Option
+    Option,
+    Boolean,
+    Percent
   }
 }

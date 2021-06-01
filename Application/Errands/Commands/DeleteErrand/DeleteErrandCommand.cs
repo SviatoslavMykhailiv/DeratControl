@@ -27,7 +27,7 @@ namespace Application.Errands.Commands.DeleteErrand {
       }
 
       protected override async Task<Unit> Handle(RequestContext context, DeleteErrandCommand request, CancellationToken cancellationToken) {
-        var errand = await db.Errands.FirstOrDefaultAsync(e => e.Id == request.ErrandId && e.Status != ErrandStatus.Finished, cancellationToken);
+        var errand = await db.Errands.FirstOrDefaultAsync(e => e.Id == request.ErrandId, cancellationToken);
 
         if (errand is null)
           return Unit.Value;

@@ -10,11 +10,11 @@ namespace Application.Errands.Commands.CompleteErrand {
 
     public IReadOnlyCollection<PointReviewRecordDto> Records { get; init; } = new List<PointReviewRecordDto>();
 
-    public Dictionary<string, string> GetValueList() {
-      var result = new Dictionary<string, string>();
+    public Dictionary<Guid, string> GetValueList() {
+      var result = new Dictionary<Guid, string>();
 
       foreach (var record in Records)
-        result.Add(record.FieldName, record.Value);
+        result.Add(record.FieldId, record.Value);
       
       return result;
     }

@@ -11,90 +11,103 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Application.Errands.Commands.UpsertErrand {
-  public class UpsertErrandCommand : IRequest<Guid> {
-    public UpsertErrandCommand() {
-      Points = new HashSet<Guid>();
-    }
-
-    public Guid? ErrandId { get; init; }
-    public Guid FacilityId { get; init; }
-    public Guid EmployeeId { get; init; }
-    public DateTime DueDate { get; init; }
-    public string Description { get; init; }
-    public IReadOnlyCollection<Guid> Points { get; init; } = new List<Guid>();
-
-    public class UpsertErrandCommandHandler : BaseRequestHandler<UpsertErrandCommand, Guid> {
-      private readonly IDeratControlDbContext db;
-      private readonly IUserManagerService userManagerService;
-
-      public UpsertErrandCommandHandler(
-        ICurrentDateService currentDateService, 
-        ICurrentUserProvider currentUserProvider,
-        IDeratControlDbContext db,
-        IUserManagerService userManagerService) : base(currentDateService, currentUserProvider) {
-        this.db = db;
-        this.userManagerService = userManagerService;
-      }
-
-      protected override async Task<Guid> Handle(RequestContext context, UpsertErrandCommand request, CancellationToken cancellationToken) {
-        if (request.ErrandId is null && await ErrandExists(request.FacilityId, request.EmployeeId, request.DueDate))
-          throw new BadRequestException();
-
-        Errand errand;
-
-        if (request.ErrandId.HasValue) {
-          errand = await db
-            .Errands
-            .Include(e => e.Points)
-            .Include(c => c.Employee)
-            .Include(c => c.Facility)
-            .ThenInclude(c => c.Perimeters)
-            .ThenInclude(c => c.Points)
-            .ThenInclude(p => p.Trap)
-            .ThenInclude(t => t.Fields)
-            .FirstOrDefaultAsync(c => c.Id == request.ErrandId.Value && c.Status != ErrandStatus.Finished, cancellationToken: cancellationToken) ?? throw new NotFoundException();
-        }
-        else {
-          errand = new Errand { ProviderId = context.CurrentUser.UserId };
-          db.Errands.Add(errand);
+namespace Application.Errands.Commands.UpsertErrand
+{
+    public class UpsertErrandCommand : IRequest<Guid>
+    {
+        public UpsertErrandCommand()
+        {
+            Points = new HashSet<Guid>();
         }
 
-        if (request.DueDate.Date < context.CurrentDateTime.Date)
-          throw new BadRequestException();
+        public Guid? ErrandId { get; init; }
+        public Guid FacilityId { get; init; }
+        public Guid EmployeeId { get; init; }
+        public DateTime DueDate { get; init; }
+        public string Description { get; init; }
+        public bool OnDemand { get; init; }
 
-        errand.EmployeeId = request.EmployeeId;
+        public IReadOnlyCollection<Guid> Points { get; init; } = new List<Guid>();
 
-        if (errand.FacilityId != request.FacilityId)
-          errand.Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException();
+        public class UpsertErrandCommandHandler : BaseRequestHandler<UpsertErrandCommand, Guid>
+        {
+            private readonly IDeratControlDbContext db;
+            private readonly IUserManagerService userManagerService;
 
-        errand.Description = request.Description;
-        errand.SetDueDate(request.DueDate);
-        errand.SetPointListForReview(request.Points);
+            public UpsertErrandCommandHandler(
+              ICurrentDateService currentDateService,
+              ICurrentUserProvider currentUserProvider,
+              IDeratControlDbContext db,
+              IUserManagerService userManagerService) : base(currentDateService, currentUserProvider)
+            {
+                this.db = db;
+                this.userManagerService = userManagerService;
+            }
 
-        await db.SaveChangesAsync(cancellationToken);
+            protected override async Task<Guid> Handle(RequestContext context, UpsertErrandCommand request, CancellationToken cancellationToken)
+            {
+                if (request.ErrandId is null && await ErrandExists(request.FacilityId, request.EmployeeId, request.DueDate))
+                    throw new BadRequestException();
 
-        return errand.Id;
-      }
+                Errand errand;
 
-      private Task<bool> ErrandExists(
-        Guid facilityId,
-        Guid employeeId,
-        DateTime dueDate) {
-        return db
-          .Errands
-          .AnyAsync(e => e.FacilityId == facilityId && e.EmployeeId == employeeId && e.DueDate.Date == dueDate.Date);
-      }
+                if (request.ErrandId.HasValue)
+                {
+                    errand = await db
+                      .Errands
+                      .Include(e => e.Points)
+                      .Include(c => c.Employee)
+                      .Include(c => c.Facility)
+                      .ThenInclude(c => c.Perimeters)
+                      .ThenInclude(c => c.Points)
+                      .ThenInclude(p => p.Trap)
+                      .ThenInclude(t => t.Fields)
+                      .FirstOrDefaultAsync(c => c.Id == request.ErrandId.Value, cancellationToken: cancellationToken) ?? throw new NotFoundException();
+                }
+                else
+                {
+                    errand = new Errand { ProviderId = context.CurrentUser.UserId };
+                    db.Errands.Add(errand);
+                }
 
-      private async Task<Facility> GetFacility(Guid facilityId, CancellationToken cancellationToken) {
-        return await db
-          .Facilities
-          .Include(f => f.Perimeters)
-          .ThenInclude(p => p.Points)
-          .ThenInclude(p => p.Trap)
-          .ThenInclude(t => t.Fields)
-          .FirstOrDefaultAsync(f => f.Id == facilityId, cancellationToken);
-      }
+                if (request.DueDate.Date < context.CurrentDateTime.Date)
+                    throw new BadRequestException();
+
+                errand.EmployeeId = request.EmployeeId;
+
+                if (errand.FacilityId != request.FacilityId)
+                    errand.Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException();
+
+                errand.Description = request.Description;
+                errand.SetDueDate(request.DueDate);
+                errand.SetPointListForReview(request.Points);
+                errand.OnDemand = request.OnDemand;
+
+                await db.SaveChangesAsync(cancellationToken);
+
+                return errand.Id;
+            }
+
+            private Task<bool> ErrandExists(
+              Guid facilityId,
+              Guid employeeId,
+              DateTime dueDate)
+            {
+                return db
+                  .Errands
+                  .AnyAsync(e => e.FacilityId == facilityId && e.EmployeeId == employeeId && e.DueDate.Date == dueDate.Date);
+            }
+
+            private async Task<Facility> GetFacility(Guid facilityId, CancellationToken cancellationToken)
+            {
+                return await db
+                  .Facilities
+                  .Include(f => f.Perimeters)
+                  .ThenInclude(p => p.Points)
+                  .ThenInclude(p => p.Trap)
+                  .ThenInclude(t => t.Fields)
+                  .FirstOrDefaultAsync(f => f.Id == facilityId, cancellationToken);
+            }
+        }
     }
-  }
 }
