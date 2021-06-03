@@ -19,21 +19,33 @@ namespace Domain.Entities
             Status = status;
             Report = report;
             PointId = point.Id;
-            PerimeterName = point.Perimeter.PerimeterName;
+            Perimeter = point.Perimeter;
             PointOrder = point.Order;
-            Trap = point.Trap.TrapName;
-            Supplement = point.Supplement.SupplementName;
+            Trap = point.Trap;
+            Supplement = point.Supplement;
+            PerimeterId = point.PerimeterId;
+            TrapId = point.TrapId;
+            SupplementId = point.SupplementId;
+            Report = report;
         }
 
         public Guid ErrandId { get; init; }
         public CompletedErrand Errand { get; init; }
         public Guid PointId { get; init; }
-        public string PerimeterName { get; init; }
+        
+        public Guid PerimeterId { get; init; }
+        public Perimeter Perimeter { get; init; }
+        
         public int PointOrder { get; init; }
-        public string Trap { get; init; }
-        public string Supplement { get; init; }
+        
+        public Trap Trap { get; init; }
+        public Guid TrapId { get; init; }
+        
+        public Supplement Supplement { get; init; }
+        public Guid SupplementId { get; init; }
+        
         public PointReviewStatus Status { get; init; }
-        public string Report { get; }
+        public string Report { get; init; }
 
         public IEnumerable<PointReviewRecord> Records => records;
 

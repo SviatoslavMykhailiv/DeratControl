@@ -7,6 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
+using Application.Common.Exceptions;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Application.Errands.Commands.GenerateReport
 {
@@ -40,58 +43,44 @@ namespace Application.Errands.Commands.GenerateReport
 
             public async Task<byte[]> Handle(GenerateReportCommand request, CancellationToken cancellationToken)
             {
-                //var errand = await GetErrand(request.ErrandId, cancellationToken) ?? throw new NotFoundException();
-                //var managerSignature = await fileStorage.ReadFile(errand.GetManagerSignatureFilePath());
-                ////var providerName = errand.Provider.Company == null ? errand.Provider.Name.GetFullName(CultureInfo.CurrentCulture) : errand.Provider.Company.CompanyName;
+                var errand = await GetErrand(request.ErrandId, cancellationToken) ?? throw new NotFoundException();
 
-                //reportBuilder
-                //    .AddVerticalSpace()
-                //    .AddText("ТОВ Залупа", Align.Center, 32)
-                //    .AddVerticalSpace()
-                //    .AddText($"{localizer["ReviewDate"].Value}: {errand.CompleteDate.Value.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)}", Align.Right, 20)
-                //    .AddVerticalSpace()
-                //    .AddText($"{localizer["ReviewedBy"].Value}: {errand.Employee.GetFullName()}", Align.Right, 20)
-                //    .AddVerticalSpace()
-                //    .AddText(errand.Description, Align.Center, 24)
-                //    .AddVerticalSpace()
-                //    .AddText(errand.Facility.CompanyName, Align.Center, 24)
-                //    .AddVerticalSpace();
+                reportBuilder
+                    .AddVerticalSpace()
+                    .AddText(errand.Provider.ProviderName, Align.Center, 32)
+                    .AddVerticalSpace()
+                    .AddVerticalSpace()
+                    .AddText(errand.Facility.GetInfo(), Align.Center, 24)
+                    .AddVerticalSpace();
 
-                //var points = errand.Points.OrderBy(p => p.Point.Order).GroupBy(t => t.Point.Trap);
+                foreach (var grouped in errand.PointReviewHistory.GroupBy(p => new { p.Perimeter, p.Trap, p.Supplement }))
+                {
+                    reportBuilder
+                               .AddVerticalSpace()
+                               .AddText($"Периметр - {grouped.Key.Perimeter.PerimeterName}, {grouped.Key.Trap.TrapName} - {grouped.Key.Supplement.SupplementName}", Align.Center, 20)
+                               .AddVerticalSpace();
 
-                //var genericColumns = new List<string> { 
-                //  localizer["TrapOrder"].Value, 
-                //  localizer["SupplementName"].Value, 
-                //  localizer["Action"].Value };
+                    var tableColumns = new List<Column> { new Column(1, "№ п/п", grouped.Key.Trap.Color) };
+                    tableColumns.AddRange(grouped.Key.Trap.Fields.OrderBy(f => f.Order).Select(f => new Column(f.Order + 1, f.FieldName)));
+                    
+                    var table = new Table(tableColumns);
 
-                //foreach (var trap in points) {
-                //  var tableColumns = new List<string>(genericColumns);
-                //  tableColumns.AddRange(trap.Key.Fields.OrderBy(f => f.Order).Select(field => field.FieldName));
+                    foreach (var point in grouped.OrderBy(p => p.PointOrder))
+                    {
+                        Row row = table.NewRow();
+                        row[tableColumns[0]] = point.PointOrder.ToString();
 
-                //  tableColumns.Add(localizer["Notes"].Value);
+                        foreach(var record in point.Records) 
+                        {
+                            row[tableColumns[record.Field.Order]] = record.GetValue();
+                        }
+                    }
 
-                //  var table = new Table(tableColumns);
-
-                //  foreach (var point in trap) {
-                //    var row = table.NewRow();
-
-                //    row[genericColumns[0]] = point.Point.Order.ToString();
-                //    row[genericColumns[1]] = point.Point.Supplement.SupplementName;
-                //    row[genericColumns[2]] = localizer[point.Status.ToString()].Value;
-
-                //    foreach (var field in trap.Key.Fields.OrderBy(f => f.Order))
-                //      row[field.FieldName] = point[field.Id];
-
-                //    row[localizer["Notes"].Value] = point.Report;
-                //  }
-
-                //  reportBuilder.AddTable(table);
-
-                //  reportBuilder.AddVerticalSpace();
-                //  reportBuilder.AddVerticalSpace();
-                //}
-
-                //reportBuilder.AddSignature(managerSignature, Align.Right);
+                    reportBuilder
+                        .AddTable(table)
+                        .AddVerticalSpace()
+                        .AddVerticalSpace();
+                }
 
                 return reportBuilder.GetReport();
             }
@@ -100,8 +89,19 @@ namespace Application.Errands.Commands.GenerateReport
             {
                 return db
                     .CompletedErrands
+                    .Include(c => c.Facility)
+                    .Include(c => c.Employee)
+                    .Include(c => c.Provider)
                     .Include(e => e.PointReviewHistory)
-                    .ThenInclude(p => p.Records).FirstOrDefaultAsync(e => e.Id == errandId, cancellationToken: cancellationToken);
+                    .ThenInclude(p => p.Perimeter)
+                    .Include(e => e.PointReviewHistory)
+                    .ThenInclude(p => p.Trap)
+                    .ThenInclude(t => t.Fields)
+                    .Include(e => e.PointReviewHistory)
+                    .ThenInclude(e => e.Supplement)
+                    .Include(e => e.PointReviewHistory)
+                    .ThenInclude(p => p.Records)
+                    .FirstOrDefaultAsync(e => e.Id == errandId, cancellationToken: cancellationToken);
             }
         }
     }

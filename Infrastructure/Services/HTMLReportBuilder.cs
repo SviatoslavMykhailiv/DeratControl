@@ -39,7 +39,7 @@ namespace DeratControl.Infrastructure.Services.Reports
         {
             contentBuilder.Append(@"<table style=""width:100%; border-spacing:5px;border: 1px solid black;border-collapse: collapse;"">");
 
-            var headRows = string.Concat(table.Columns.Select(c => $@"<th style=""border: 1px solid black;border-collapse: collapse;padding: 5px;text-align: left;"">{c}</th>"));
+            var headRows = string.Concat(table.Columns.Select(c => $@"<th style=""border: 1px solid black;border-collapse: collapse;padding: 5px;text-align: left;"">{c.Name}</th>"));
             contentBuilder.Append($"<tr>{headRows}</tr>");
 
             foreach (var row in table)
@@ -47,7 +47,25 @@ namespace DeratControl.Infrastructure.Services.Reports
                 contentBuilder.Append("<tr>");
 
                 foreach (var column in table.Columns)
-                    contentBuilder.Append($@"<td style=""padding: 5px;border: 1px solid black;border-collapse: collapse;"">{row[column]}</td>");
+                {
+                    var value = string.Empty;
+
+                    switch (row[column])
+                    {
+                        case "True":
+                            value = @"<input type=""checkbox"" checked/>";
+                            break;
+                        case "False":
+                            value = string.Empty;
+                            break;
+                        default:
+                            value = row[column];
+                            break;
+                    }
+
+                    contentBuilder.Append($@"<td style=""padding: 5px;border: 1px solid black;border-collapse: collapse; background-color:{column.Color}"">{value}</td>");
+                }
+                    
 
                 contentBuilder.Append("</tr>");
             }

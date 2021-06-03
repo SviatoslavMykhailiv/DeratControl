@@ -12,6 +12,7 @@ namespace Domain.Entities
 
         private int order;
         private Trap trap;
+        private Supplement supplement;
 
         private readonly HashSet<PointReview> reviews = new HashSet<PointReview>();
 
@@ -27,7 +28,7 @@ namespace Domain.Entities
                 if (value <= 0)
                     throw new InvalidOperationException("Order cannot be less than 0.");
 
-                var pointWithSameOrderExists = Perimeter.Points.Any(p => p.Order == value && p.Trap == trap && p != this);
+                var pointWithSameOrderExists = Perimeter.Points.Any(p => p.Order == value && p.Trap == trap && p.Supplement == supplement && p != this);
 
                 if (pointWithSameOrderExists)
                     throw new InvalidOperationException($"Point with order {value} already exists.");
@@ -44,7 +45,7 @@ namespace Domain.Entities
             get => trap;
             set
             {
-                var pointWithSameTrapExists = Perimeter.Points.Any(p => p.Order == order && p.Trap == value && p != this);
+                var pointWithSameTrapExists = Perimeter.Points.Any(p => p.Order == order && p.Supplement == supplement && p.Trap == value && p != this);
 
                 if (pointWithSameTrapExists)
                     throw new InvalidOperationException($"Point with trap {value} already exists.");
@@ -53,7 +54,20 @@ namespace Domain.Entities
             }
         }
 
-        public Supplement Supplement { get; set; }
+        public Supplement Supplement 
+        {
+            get => supplement;
+            set
+            {
+                var pointWithSameSupplementExists = Perimeter.Points.Any(p => p.Order == order && p.Supplement == value && p.Trap == trap && p != this);
+
+                if (pointWithSameSupplementExists)
+                    throw new InvalidOperationException($"Point with supplement {value} already exists.");
+
+                supplement = value;
+            }
+        }
+
         public Perimeter Perimeter { get; init; }
 
         public IEnumerable<PointReview> Reviews => reviews;

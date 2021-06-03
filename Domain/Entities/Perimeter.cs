@@ -43,7 +43,7 @@ namespace Domain.Entities
 
         private void AddPoint(int order, int leftLoc, int topLoc, Trap trap, Supplement supplement)
         {
-            if (points.Any(p => p.Order == order && p.Trap == trap))
+            if (points.Any(p => p.Order == order && p.Trap == trap && p.Supplement == supplement))
                 throw new InvalidOperationException($"Point with order {order} already exists.");
 
             var point = new Point
@@ -61,7 +61,7 @@ namespace Domain.Entities
 
         private void UpdatePoint(Guid pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement)
         {
-            if (points.Any(p => p.Id != pointId && p.Order == order && p.Trap == trap))
+            if (points.Any(p => p.Id != pointId && p.Order == order && p.Trap == trap && p.Supplement == supplement))
                 throw new InvalidOperationException($"Point with order {order} already exists.");
 
             var point = points.First(p => p.Id == pointId);

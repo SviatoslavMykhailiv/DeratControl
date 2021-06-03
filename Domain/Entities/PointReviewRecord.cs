@@ -35,5 +35,15 @@ namespace Domain.Entities
 
         public CompletedPointReview PointReview { get; init; }
         public Field Field { get; init; }
+
+        public string GetValue() 
+        {
+            if(Field.FieldType == FieldType.Boolean) 
+            {
+                return Convert.ToBoolean(Convert.ToInt16(Value)).ToString();
+            }
+
+            return value;
+        }
     }
 }
