@@ -53,7 +53,10 @@ namespace Application.Errands.Commands.GenerateReport
                     .AddText(errand.Facility.GetInfo(), Align.Center, 24)
                     .AddVerticalSpace();
 
-                foreach (var grouped in errand.PointReviewHistory.GroupBy(p => new { p.Perimeter, p.Trap, p.Supplement }))
+                foreach (var grouped in errand.PointReviewHistory
+                    .OrderBy(p => p.PerimeterId)
+                    .ThenBy(p => p.TrapId)
+                    .GroupBy(p => new { p.Perimeter, p.Trap, p.Supplement }))
                 {
                     reportBuilder
                                .AddVerticalSpace()
