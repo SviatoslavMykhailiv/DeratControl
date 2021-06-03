@@ -47,7 +47,7 @@ namespace Infrastructure {
       services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 
       services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
-      services.AddSingleton<IReportBuilder, HTMLReportBuilder>();
+      services.AddScoped<IReportBuilder, HTMLReportBuilder>();
 
       services.AddOptions<EncryptionOptions>().Configure(options =>
       {
