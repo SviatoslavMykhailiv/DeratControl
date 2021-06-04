@@ -27,7 +27,12 @@ namespace Application.Errands.Queries.GetErrandHistory
                 CompleteDate = errand.CompleteDate.ToString("d"),
                 EmployeeName = errand.Employee.GetFullName(),
                 FacilityName = errand.Facility.GetInfo(),
-                Points = errand.PointReviewHistory.Select(p => new PointReviewHistoryDto
+                Points = errand.PointReviewHistory
+                .OrderBy(p => p.PerimeterId)
+                .ThenBy(p => p.TrapId)
+                .ThenBy(p => p.SupplementId)
+                .ThenBy(p => p.PointOrder)
+                .Select(p => new PointReviewHistoryDto
                 {
                     Order = p.PointOrder,
                     TrapName = p.Trap.TrapName,

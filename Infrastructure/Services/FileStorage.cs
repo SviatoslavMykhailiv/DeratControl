@@ -37,6 +37,8 @@ namespace Infrastructure.Services
 
         public Task Remove(string path)
         {
+            if (string.IsNullOrWhiteSpace(path)) return Task.CompletedTask;
+
             var fullPath = Path.Combine(configuration[BASE_FILE_PATH_NAME], path);
 
             if (File.Exists(fullPath))

@@ -17,5 +17,10 @@ namespace Domain.Entities
         {
             CertificateFilePath = Path.Combine("supplements", "certificate", $"{Id}.{fileFormat}");
         }
+
+        public override string ToString()
+        {
+            return SupplementName;
+        }
     }
 }
