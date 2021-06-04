@@ -40,7 +40,7 @@ namespace Infrastructure.Services
                 Orientation = Orientation.Portrait,
                 PaperSize = PaperKind.A4,
                 Margins = new MarginSettings { Top = 10 },
-                DocumentTitle = $"QR {localizer["Codes"]} - {facility.Name}"
+                DocumentTitle = $"QR Коди - {facility.Name}"
             };
 
             var pdf = new HtmlToPdfDocument() { GlobalSettings = globalSettings };
@@ -50,13 +50,13 @@ namespace Infrastructure.Services
                 var sheetBuilder = new StringBuilder();
                 sheetBuilder.Append(@"<!DOCTYPE html><html><head><meta charset=""utf-8""/></head><body>");
                 sheetBuilder.Append($@"<div style=""text-align:center; font-size:28px;font-weight:bold;"">{facility.Name}<hr/></div>");
-                sheetBuilder.Append($@"<div style=""text-align:center; font-size:20px;"">{localizer["Perimeter"]} - {facility.GetPerimeter(identifier.Key).PerimeterName}</div><br/>");
+                sheetBuilder.Append($@"<div style=""text-align:center; font-size:20px;"">Периметр - {facility.GetPerimeter(identifier.Key).PerimeterName}</div><br/>");
 
                 foreach (var code in identifier)
                 {
                     var imgTag = $@"
                             <div style=""display:inline-block; margin-right:5px; margin-left:5px;"">
-                              <div style=""text-align:center; margin-bottom:2px;"">{localizer["Trap"]} №{code.Order}, {traps[code.TrapId].TrapName}</div>
+                              <div style=""text-align:center; margin-bottom:2px;"">Пастка №{code.Order}, {traps[code.TrapId].TrapName}</div>
                               {GetImgTag(qrCodeService.Generate(encryptionService.Encrypt(code)))}
                             </div>";
 
@@ -69,7 +69,7 @@ namespace Infrastructure.Services
                     HtmlContent = sheetBuilder.ToString(),
                     WebSettings = { DefaultEncoding = "utf-8" },
                     HeaderSettings = { FontName = "Arial", FontSize = 9, Right = string.Empty, Line = false },
-                    FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = $"QR {localizer["Codes"]} - {facility.Name}" }
+                    FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = $"QR Коди - {facility.Name}" }
                 };
 
                 pdf.Objects.Add(objectSettings);
@@ -101,7 +101,7 @@ namespace Infrastructure.Services
             var sheetBuilder = new StringBuilder();
             sheetBuilder.Append(@"<!DOCTYPE html><html><head><meta charset=""utf-8""/></head><body>");
             sheetBuilder.Append($@"<div style=""text-align:center; font-size:28px;font-weight:bold;"">{perimeter.Facility.Name}<hr/></div>");
-            sheetBuilder.Append($@"<div style=""text-align:center; font-size:20px;"">{localizer["Perimeter"]} - {perimeter.PerimeterName}</div><br/>");
+            sheetBuilder.Append($@"<div style=""text-align:center; font-size:20px;"">Периметр - {perimeter.PerimeterName}</div><br/>");
 
             foreach (var point in points)
             {
@@ -111,7 +111,7 @@ namespace Infrastructure.Services
 
                 var imgTag = $@"
                             <div style=""display:inline-block; margin-right:5px; margin-left:5px;"">
-                              <div style=""text-align:center; margin-bottom:2px;"">{localizer["Trap"]} №{point.Order}, {trapName}</div>
+                              <div style=""text-align:center; margin-bottom:2px;"">Пастка №{point.Order}, {trapName}</div>
                               {GetImgTag(qrCodeService.Generate(qr))}
                             </div>";
 
@@ -124,7 +124,7 @@ namespace Infrastructure.Services
                 HtmlContent = sheetBuilder.ToString(),
                 WebSettings = { DefaultEncoding = "utf-8" },
                 HeaderSettings = { FontName = "Arial", FontSize = 9, Right = string.Empty, Line = false },
-                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = $"QR {localizer["Codes"]} - {perimeter.Facility.Name}" }
+                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = $"QR Коди - {perimeter.Facility.Name}" }
             };
 
             pdf.Objects.Add(objectSettings);

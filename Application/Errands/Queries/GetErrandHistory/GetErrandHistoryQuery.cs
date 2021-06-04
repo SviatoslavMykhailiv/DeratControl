@@ -40,7 +40,7 @@ namespace Application.Errands.Queries.GetErrandHistory
                 if (request.FacilityId.HasValue)
                     query = query.Where(e => e.FacilityId == request.FacilityId.Value);
 
-                var result = await query.ToListAsync(cancellationToken);
+                var result = await query.OrderByDescending(e => e.CompleteDate).AsNoTracking().ToListAsync(cancellationToken);
 
                 return result.Select(e => ErrandHistoryDto.Map(e));
             }
