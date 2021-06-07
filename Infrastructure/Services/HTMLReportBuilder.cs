@@ -48,20 +48,12 @@ namespace DeratControl.Infrastructure.Services.Reports
 
                 foreach (var column in table.Columns)
                 {
-                    var value = string.Empty;
-
-                    switch (row[column])
+                    var value = (row[column]) switch
                     {
-                        case "True":
-                            value = @"<input type=""checkbox"" checked/>";
-                            break;
-                        case "False":
-                            value = string.Empty;
-                            break;
-                        default:
-                            value = row[column];
-                            break;
-                    }
+                        "True" => @"<input type=""checkbox"" checked/>",
+                        "False" => string.Empty,
+                        _ => row[column]
+                    };
 
                     contentBuilder.Append($@"<td style=""padding: 5px;border: 1px solid black;border-collapse: collapse; background-color:{column.Color}"">{value}</td>");
                 }

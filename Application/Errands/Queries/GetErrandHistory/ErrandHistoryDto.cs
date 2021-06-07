@@ -1,7 +1,5 @@
 ﻿using Domain.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Application.Errands.Queries.GetErrandHistory
 {
@@ -14,7 +12,6 @@ namespace Application.Errands.Queries.GetErrandHistory
         public string CompleteDate { get; init; }
         public string EmployeeName { get; init; }
         public string FacilityName { get; init; }
-        public ICollection<PointReviewHistoryDto> Points { get; init; } = new List<PointReviewHistoryDto>();
 
         public static ErrandHistoryDto Map(CompletedErrand errand)
         {
@@ -26,20 +23,7 @@ namespace Application.Errands.Queries.GetErrandHistory
                 DueDate = errand.DueDate.ToString("d"),
                 CompleteDate = errand.CompleteDate.ToString("d"),
                 EmployeeName = errand.Employee.GetFullName(),
-                FacilityName = errand.Facility.GetInfo(),
-                Points = errand.PointReviewHistory
-                .OrderBy(p => p.PerimeterId)
-                .ThenBy(p => p.TrapId)
-                .ThenBy(p => p.SupplementId)
-                .ThenBy(p => p.PointOrder)
-                .Select(p => new PointReviewHistoryDto
-                {
-                    Order = p.PointOrder,
-                    TrapName = p.Trap.TrapName,
-                    SupplementName = p.Supplement.SupplementName,
-                    PerimeterName = p.Perimeter.PerimeterName,
-                    Status = p.Status.ToString()
-                }).ToList()
+                FacilityName = errand.Facility.GetInfo()
             };
         }
     }

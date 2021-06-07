@@ -1,27 +1,30 @@
-﻿using Application.Common.Interfaces;
-using Domain.Entities;
+﻿using Application.Common.Dtos;
+using Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Errands.Queries.GetErrandHistory
 {
-    public record GetErrandHistoryQuery : IRequest<IEnumerable<ErrandHistoryDto>>
+    public record GetErrandHistoryQuery : IRequest<ItemList<ErrandHistoryDto>>
     {
-        public GetErrandHistoryQuery(Guid? facilityId, Guid? employeeId)
+        public GetErrandHistoryQuery(Guid? facilityId, Guid? employeeId, int skip, int take)
         {
             FacilityId = facilityId;
             EmployeeId = employeeId;
+            Skip = skip;
+            Take = take;
         }
 
         public Guid? FacilityId { get; }
         public Guid? EmployeeId { get; }
+        public int Skip { get; }
+        public int Take { get; }
 
-        public class GetErrandHistoryQueryHandler : IRequestHandler<GetErrandHistoryQuery, IEnumerable<ErrandHistoryDto>>
+        public class GetErrandHistoryQueryHandler : IRequestHandler<GetErrandHistoryQuery, ItemList<ErrandHistoryDto>>
         {
             private readonly IDeratControlDbContext db;
 
@@ -30,9 +33,12 @@ namespace Application.Errands.Queries.GetErrandHistory
                 this.db = db;
             }
 
-            public async Task<IEnumerable<ErrandHistoryDto>> Handle(GetErrandHistoryQuery request, CancellationToken cancellationToken)
+            public async Task<ItemList<ErrandHistoryDto>> Handle(GetErrandHistoryQuery request, CancellationToken cancellationToken)
             {
-                var query = GetErrandsQuery();
+                var query = db.CompletedErrands
+                    .Include(c => c.Facility)
+                    .Include(c => c.Employee)
+                    .AsQueryable();
 
                 if (request.EmployeeId.HasValue)
                     query = query.Where(e => e.EmployeeId == request.EmployeeId.Value);
@@ -40,25 +46,16 @@ namespace Application.Errands.Queries.GetErrandHistory
                 if (request.FacilityId.HasValue)
                     query = query.Where(e => e.FacilityId == request.FacilityId.Value);
 
-                var result = await query.OrderByDescending(e => e.CompleteDate).AsNoTracking().ToListAsync(cancellationToken);
+                var totalCount = await query.CountAsync(cancellationToken);
 
-                return result.Select(e => ErrandHistoryDto.Map(e));
-            }
+                var result = await query
+                    .OrderByDescending(e => e.CompleteDate)
+                    .Skip(request.Skip)
+                    .Take(request.Take)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken);
 
-            private IQueryable<CompletedErrand> GetErrandsQuery()
-            {
-                return db.CompletedErrands
-                    .Include(c => c.Facility)
-                    .Include(c => c.Employee)
-                    .Include(c => c.Provider)
-                    .Include(p => p.PointReviewHistory)
-                    .ThenInclude(p => p.Perimeter)
-                    .Include(p => p.PointReviewHistory)
-                    .ThenInclude(p => p.Trap)
-                    .Include(p => p.PointReviewHistory)
-                    .ThenInclude(p => p.Supplement)
-                    .Include(p => p.PointReviewHistory)
-                    .ThenInclude(p => p.Records);
+                return new ItemList<ErrandHistoryDto> { Items = result.Select(e => ErrandHistoryDto.Map(e)), TotalCount = totalCount };
             }
         }
     }
