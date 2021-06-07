@@ -74,8 +74,6 @@ namespace Domain.Entities
             return new CompletedErrand(this, completeDate, report, completedPointReviews);
         }
 
-        public int GetDaysOverdue() => (DueDate.Date - OriginalDueDate.Date).Days;
-
         public void SetPointListForReview(IEnumerable<Guid> selectedPointList)
         {
             var inputPointSet = selectedPointList.ToHashSet();

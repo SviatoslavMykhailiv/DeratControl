@@ -50,6 +50,8 @@ namespace Application.Supplements.Queries
                     .ToListAsync(cancellationToken);
                 });
 
+                supplements.ForEach(s => s.SetIsOverdue(context.CurrentDateTime));
+
                 return supplements;
             }
         }

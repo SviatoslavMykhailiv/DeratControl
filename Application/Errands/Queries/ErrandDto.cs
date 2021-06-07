@@ -23,7 +23,15 @@ namespace Application.Errands.Queries
 
         public ICollection<PointReviewDto> Points { get; init; } = new List<PointReviewDto>();
 
-        public static ErrandDto Map(Errand errand, CurrentUser currentUser)
+        private static DateTime GetDueDate(DateTime dueDate, CurrentUser currentUser, DateTime currentDatetime)
+        {
+            if (currentUser.Role == UserRole.Provider)
+                return dueDate;
+
+            return dueDate.Date < currentDatetime.Date ? currentDatetime.Date : dueDate.Date;
+        }
+
+        public static ErrandDto Map(Errand errand, CurrentUser currentUser, DateTime currentDatetime)
         {
             var perimeters = errand.Facility.Perimeters.ToDictionary(p => p.Id);
 
@@ -38,8 +46,8 @@ namespace Application.Errands.Queries
                 City = errand.Facility.City,
                 Address = errand.Facility.Address,
                 OnDemand = errand.OnDemand,
-                DueDate = errand.DueDate.ToString("d"),
-                DaysOverdue = currentUser.Role == UserRole.Employee ? 0 : errand.GetDaysOverdue(),
+                DueDate = GetDueDate(errand.DueDate, currentUser, currentDatetime).ToString("d"),
+                DaysOverdue = currentUser.Role == UserRole.Employee ? 0 : (currentDatetime.Date - errand.DueDate.Date).Days,
                 Points = errand.Points.Select(p => new PointReviewDto
                 {
                     PointId = p.PointId,

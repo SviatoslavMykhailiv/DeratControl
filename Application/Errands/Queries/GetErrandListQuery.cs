@@ -45,7 +45,7 @@ namespace Application.Errands.Queries
                     .Take(request.Take ?? 10)
                     .ToListAsync(cancellationToken: cancellationToken);
 
-                return new ItemList<ErrandDto> { Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser)), TotalCount = totalCount };
+                return new ItemList<ErrandDto> { Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime)), TotalCount = totalCount };
             }
 
             private IQueryable<Errand> GetErrandsQuery()

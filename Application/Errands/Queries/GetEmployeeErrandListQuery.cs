@@ -3,11 +3,9 @@ using Application.Common.Interfaces;
 using Application.Common.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Domain.Enums;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Domain.Entities;
 using Application.Common.Dtos;
 
@@ -21,9 +19,9 @@ namespace Application.Errands.Queries
             private readonly IDeratControlDbContext db;
 
             public GetEmployeeErrandListQueryHandler(
-              IDeratControlDbContext db,
-              ICurrentDateService currentDateService,
-              ICurrentUserProvider currentUserProvider) : base(currentDateService, currentUserProvider)
+                IDeratControlDbContext db,
+                ICurrentDateService currentDateService,
+                ICurrentUserProvider currentUserProvider) : base(currentDateService, currentUserProvider)
             {
                 this.db = db;
             }
@@ -33,8 +31,8 @@ namespace Application.Errands.Queries
                 var query = GetErrandsQuery(context.CurrentUser);
 
                 var errands = await query.ToListAsync(cancellationToken: cancellationToken);
-                
-                return  new ItemList<ErrandDto> { Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser)), TotalCount = errands.Count } ;
+
+                return new ItemList<ErrandDto> { Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime)), TotalCount = errands.Count };
             }
 
             private IQueryable<Errand> GetErrandsQuery(CurrentUser user)
