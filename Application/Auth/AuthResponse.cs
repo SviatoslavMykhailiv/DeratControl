@@ -1,3 +1,4 @@
-﻿namespace Application.Auth {
-  public record AuthResponse(string Token);
+﻿namespace Application.Auth
+{
+    public record AuthResponse(string Token);
 }

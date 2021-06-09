@@ -1,8 +1,10 @@
 ﻿using Application.Common;
+using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading;
@@ -40,6 +42,11 @@ namespace Application.Traps.Commands.DeleteTrap
 
                 if (trap is null)
                     return Unit.Value;
+
+                var inUse = await db.Points.AnyAsync(p => p.TrapId == request.TrapId, cancellationToken: cancellationToken);
+
+                if (inUse)
+                    throw new BadRequestException("Пастка використовується.");
 
                 db.Traps.Remove(trap);
 

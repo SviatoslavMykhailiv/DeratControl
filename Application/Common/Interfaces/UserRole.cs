@@ -1,7 +1,9 @@
-﻿namespace Application.Common.Interfaces {
-  public enum UserRole {
-    Provider,
-    Employee,
-    Customer
-  }
+﻿namespace Application.Common.Interfaces
+{
+    public enum UserRole
+    {
+        Provider,
+        Employee,
+        Customer
+    }
 }

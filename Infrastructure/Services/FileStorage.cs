@@ -20,19 +20,18 @@ namespace Infrastructure.Services
 
         public Task<byte[]> ReadFile(string path)
         {
-
             var sections = path.Split(Path.DirectorySeparatorChar);
             var fileName = sections[^1];
 
             var fullPath = Path.Combine(configuration[BASE_FILE_PATH_NAME], path.Replace(fileName, string.Empty));
 
             if (Directory.Exists(fullPath) == false)
-                throw new NotFoundException();
+                throw new NotFoundException("Файл не знайдено.");
 
             if (File.Exists(Path.Combine(fullPath, fileName)))
                 return File.ReadAllBytesAsync(Path.Combine(configuration[BASE_FILE_PATH_NAME], path));
 
-            throw new NotFoundException();
+            throw new NotFoundException("Файл не знайдено.");
         }
 
         public Task Remove(string path)

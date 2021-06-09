@@ -15,6 +15,7 @@ namespace Application.Common.Interfaces
         DbSet<Trap> Traps { get; }
         DbSet<Supplement> Supplements { get; }
         DbSet<CompletedErrand> CompletedErrands { get; }
+        DbSet<Point> Points { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

@@ -51,7 +51,7 @@ namespace Application.Supplements.Queries.GetSupplement
                     return await db
                     .Supplements
                     .ProjectTo<SupplementDto>(mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(t => t.SupplementId == request.SupplementId, cancellationToken: cancellationToken) ?? throw new NotFoundException();
+                    .FirstOrDefaultAsync(t => t.SupplementId == request.SupplementId, cancellationToken: cancellationToken) ?? throw new NotFoundException("Засіб не знайдено.");
                 }
 
                 return cached.Find(c => c.SupplementId == request.SupplementId);

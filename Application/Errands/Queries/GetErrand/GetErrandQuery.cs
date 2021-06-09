@@ -37,7 +37,7 @@ namespace Application.Errands.Queries.GetErrand
                 var errand = await GetErrandsQuery(request.ErrandId);
 
                 if (errand is null)
-                    throw new NotFoundException();
+                    throw new NotFoundException("Завдання не знайдено.");
 
                 return ErrandDto.Map(errand, context.CurrentUser, context.CurrentDateTime);
             }

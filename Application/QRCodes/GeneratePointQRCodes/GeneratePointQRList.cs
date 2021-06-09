@@ -30,7 +30,7 @@ namespace Application.QRCodes.GeneratePointQRCodes
 
             public async Task<byte[]> Handle(GeneratePointQRListCommand request, CancellationToken cancellationToken)
             {
-                var perimeter = await GetPerimeter(request.PerimeterId, cancellationToken) ?? throw new NotFoundException();
+                var perimeter = await GetPerimeter(request.PerimeterId, cancellationToken) ?? throw new NotFoundException("Периметр не знайдено.");
                 var traps = await GetTrapList(request.Points.Select(p => p.TrapId).Distinct().ToArray(), cancellationToken);
                 return qrListGenerator.Generate(perimeter, request.Points, traps);
             }

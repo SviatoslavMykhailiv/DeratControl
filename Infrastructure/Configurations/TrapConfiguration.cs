@@ -3,18 +3,21 @@ using Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Configurations {
-  public class TrapConfiguration : BaseEntityTypeConfiguration<Trap> {
-    public override void Configure(EntityTypeBuilder<Trap> builder) {
-      base.Configure(builder);
-      
-      builder.Property(c => c.ProviderId).HasColumnName("ProviderFID");
+namespace Infrastructure.Configurations
+{
+    public class TrapConfiguration : BaseEntityTypeConfiguration<Trap>
+    {
+        public override void Configure(EntityTypeBuilder<Trap> builder)
+        {
+            base.Configure(builder);
 
-      builder.HasMany(s => s.Fields)
-        .WithOne(f => f.Trap)
-        .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(c => c.ProviderId).HasColumnName("ProviderFID");
 
-      builder.HasOne(e => (ApplicationUser)e.Provider);
+            builder.HasMany(s => s.Fields)
+              .WithOne(f => f.Trap)
+              .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(e => (ApplicationUser)e.Provider);
+        }
     }
-  }
 }

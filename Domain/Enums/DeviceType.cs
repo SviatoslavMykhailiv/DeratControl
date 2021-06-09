@@ -1,6 +1,8 @@
-﻿namespace Domain.Enums {
-  public enum DeviceType {
-    iOS,
-    Android
-  }
+﻿namespace Domain.Enums
+{
+    public enum DeviceType
+    {
+        iOS,
+        Android
+    }
 }

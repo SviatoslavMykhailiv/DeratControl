@@ -1,8 +1,10 @@
-﻿namespace Domain.Enums {
-  public enum PointReviewStatus {
-    NotReviewed,
-    Reviewed,
-    Edited,
-    Missing
-  }
+﻿namespace Domain.Enums
+{
+    public enum PointReviewStatus
+    {
+        NotReviewed,
+        Reviewed,
+        Edited,
+        Missing
+    }
 }

@@ -41,11 +41,11 @@ namespace Application.Errands.Commands.CompleteErrand
 
             protected override async Task<Unit> Handle(RequestContext context, CompleteErrandCommand request, CancellationToken cancellationToken)
             {
-                var errand = await GetErrand(request.ErrandId, context.CurrentUser.UserId) ?? throw new NotFoundException();
+                var errand = await GetErrand(request.ErrandId, context.CurrentUser.UserId) ?? throw new NotFoundException("Завдання не знайдено.");
                 var incomingPointList = request.Points.ToDictionary(p => p.PointId);
 
                 if (errand.IsSecurityCodeValid(request.SecurityCode) == false)
-                    throw new BadRequestException();
+                    throw new BadRequestException("Захисний код невірний.");
 
                 var completedPointReviewList = new List<CompletedPointReview>();
 
@@ -62,18 +62,18 @@ namespace Application.Errands.Commands.CompleteErrand
                 }
 
                 var completedErrand = errand.Complete(
-                    currentDateService.CurrentDate, 
-                    request.Report, 
+                    currentDateService.CurrentDate,
+                    request.Report,
                     completedPointReviewList);
 
                 var image = (Image)request.Signature;
 
-                if(image is not null)
+                if (image is not null)
                     await fileStorage.SaveFile(errand.GetManagerSignatureFilePath(), image);
 
                 db.Errands.Remove(errand);
                 db.CompletedErrands.Add(completedErrand);
-                
+
                 await db.SaveChangesAsync(cancellationToken);
 
                 return Unit.Value;

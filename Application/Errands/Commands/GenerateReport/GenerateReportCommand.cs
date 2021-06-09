@@ -43,7 +43,7 @@ namespace Application.Errands.Commands.GenerateReport
 
             public async Task<byte[]> Handle(GenerateReportCommand request, CancellationToken cancellationToken)
             {
-                var errand = await GetErrand(request.ErrandId, cancellationToken) ?? throw new NotFoundException();
+                var errand = await GetErrand(request.ErrandId, cancellationToken) ?? throw new NotFoundException("Завдання не знайдено.");
 
                 reportBuilder
                     .AddVerticalSpace()
@@ -65,7 +65,7 @@ namespace Application.Errands.Commands.GenerateReport
 
                     var tableColumns = new List<Column> { new Column(1, "№ п/п", grouped.Key.Trap.Color) };
                     tableColumns.AddRange(grouped.Key.Trap.Fields.OrderBy(f => f.Order).Select(f => new Column(f.Order + 1, f.FieldName)));
-                    
+
                     var table = new Table(tableColumns);
 
                     foreach (var point in grouped.OrderBy(p => p.PointOrder))
@@ -73,7 +73,7 @@ namespace Application.Errands.Commands.GenerateReport
                         Row row = table.NewRow();
                         row[tableColumns[0]] = point.PointOrder.ToString();
 
-                        foreach(var record in point.Records) 
+                        foreach (var record in point.Records)
                         {
                             row[tableColumns[record.Field.Order]] = record.GetValue();
                         }

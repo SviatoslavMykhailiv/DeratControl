@@ -46,6 +46,8 @@ namespace Infrastructure
 
         public DbSet<CompletedErrand> CompletedErrands { get; set; }
 
+        public DbSet<Point> Points { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

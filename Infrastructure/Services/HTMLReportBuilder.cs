@@ -57,7 +57,7 @@ namespace DeratControl.Infrastructure.Services.Reports
 
                     contentBuilder.Append($@"<td style=""padding: 5px;border: 1px solid black;border-collapse: collapse; background-color:{column.Color}"">{value}</td>");
                 }
-                    
+
 
                 contentBuilder.Append("</tr>");
             }
@@ -136,18 +136,20 @@ namespace DeratControl.Infrastructure.Services.Reports
             return converter.Convert(pdf);
         }
 
-    public IReportBuilder AddSignature(byte[] signature, Align align) {
+        public IReportBuilder AddSignature(byte[] signature, Align align)
+        {
 
-      contentBuilder.Append($"<div text-align:{GetTextAlign(align)}>");
-      contentBuilder.Append(GetImgTag(signature));
-      contentBuilder.Append("</div>");
+            contentBuilder.Append($"<div text-align:{GetTextAlign(align)}>");
+            contentBuilder.Append(GetImgTag(signature));
+            contentBuilder.Append("</div>");
 
-      return this;
+            return this;
+        }
+
+        private static string GetImgTag(byte[] image)
+        {
+            var base64 = Convert.ToBase64String(image);
+            return $@"<img height=""60"" width=""60"" src=""data:image/png;base64,{base64}""/>";
+        }
     }
-
-    private static string GetImgTag(byte[] image) {
-      var base64 = Convert.ToBase64String(image);
-      return $@"<img height=""60"" width=""60"" src=""data:image/png;base64,{base64}""/>";
-    }
-  }
 }

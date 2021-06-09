@@ -29,7 +29,7 @@ namespace Application.Users.Queries.GetUser
 
             public async Task<UserDto> Handle(GetUserQuery request, CancellationToken cancellationToken)
             {
-                var user = await userManagerService.GetUser(request.UserId, cancellationToken) ?? throw new NotFoundException();
+                var user = await userManagerService.GetUser(request.UserId, cancellationToken) ?? throw new NotFoundException("Користувач не знайдений.");
                 return mapper.Map<UserDto>(user);
             }
         }

@@ -47,7 +47,7 @@ namespace Application.Errands.Commands.UpsertErrand
             protected override async Task<Guid> Handle(RequestContext context, UpsertErrandCommand request, CancellationToken cancellationToken)
             {
                 if (request.ErrandId is null && await ErrandExists(request.FacilityId, request.EmployeeId, request.DueDate))
-                    throw new BadRequestException();
+                    throw new BadRequestException("Таке завдання уже існує.");
 
                 Errand errand;
 
@@ -62,7 +62,7 @@ namespace Application.Errands.Commands.UpsertErrand
                       .ThenInclude(c => c.Points)
                       .ThenInclude(p => p.Trap)
                       .ThenInclude(t => t.Fields)
-                      .FirstOrDefaultAsync(c => c.Id == request.ErrandId.Value, cancellationToken: cancellationToken) ?? throw new NotFoundException();
+                      .FirstOrDefaultAsync(c => c.Id == request.ErrandId.Value, cancellationToken: cancellationToken) ?? throw new NotFoundException("Завдання не знайдено.");
                 }
                 else
                 {
@@ -71,12 +71,12 @@ namespace Application.Errands.Commands.UpsertErrand
                 }
 
                 if (request.DueDate.Date < context.CurrentDateTime.Date)
-                    throw new BadRequestException();
+                    throw new BadRequestException("Дата завдання не може бути заднім числом.");
 
                 errand.EmployeeId = request.EmployeeId;
 
                 if (errand.FacilityId != request.FacilityId)
-                    errand.Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException();
+                    errand.Facility = await GetFacility(request.FacilityId, cancellationToken) ?? throw new NotFoundException("Об'єкт не знайдено.");
 
                 errand.Description = request.Description;
                 errand.SetDueDate(request.DueDate);
