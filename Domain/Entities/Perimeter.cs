@@ -75,11 +75,19 @@ namespace Domain.Entities
 
         public byte[] GeneratePerimeterImage(byte[] image)
         {
-            using var imageStream = new MemoryStream(image);
-            using var bitmap = new Bitmap(imageStream);
+            Bitmap bitmap;
+
+            if(image.Length == 0)
+            {
+                bitmap = new Bitmap(1000, 1000);
+            } 
+            else
+            {
+                using var imageStream = new MemoryStream(image);
+                bitmap = new Bitmap(imageStream);
+            }
 
             var graphics = Graphics.FromImage(bitmap);
-
             var linePen = new Pen(Brushes.Gray);
             var font = new Font(new FontFamily("Times New Roman"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
 

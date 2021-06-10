@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Interfaces;
+﻿using Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -26,12 +25,12 @@ namespace Infrastructure.Services
             var fullPath = Path.Combine(configuration[BASE_FILE_PATH_NAME], path.Replace(fileName, string.Empty));
 
             if (Directory.Exists(fullPath) == false)
-                throw new NotFoundException("Файл не знайдено.");
+                return Task.FromResult(Array.Empty<byte>());
 
             if (File.Exists(Path.Combine(fullPath, fileName)))
                 return File.ReadAllBytesAsync(Path.Combine(configuration[BASE_FILE_PATH_NAME], path));
 
-            throw new NotFoundException("Файл не знайдено.");
+            return Task.FromResult(Array.Empty<byte>());
         }
 
         public Task Remove(string path)
