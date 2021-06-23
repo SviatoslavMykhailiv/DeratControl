@@ -14,5 +14,6 @@ namespace Application.Common.Interfaces
         Task<IUser> GetUser(Guid userId, CancellationToken cancellationToken = default);
         Task<IReadOnlyCollection<IUser>> GetEmployeeList(Guid providerId, bool includeInactive = true, CancellationToken cancellationToken = default);
         Task SetUserAvailability(Guid userId, bool available);
+        Task UpdateProviderName(Guid userId, string providerName);
     }
 }

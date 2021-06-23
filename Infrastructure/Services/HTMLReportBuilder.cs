@@ -136,10 +136,10 @@ namespace DeratControl.Infrastructure.Services.Reports
             return converter.Convert(pdf);
         }
 
-        public IReportBuilder AddSignature(byte[] signature, Align align)
+        public IReportBuilder AddSignature(byte[] signature)
         {
 
-            contentBuilder.Append($"<div text-align:{GetTextAlign(align)}>");
+            contentBuilder.Append($@"<div style=""position:fixed;top:10px;right:10px;z-index:20;"">");
             contentBuilder.Append(GetImgTag(signature));
             contentBuilder.Append("</div>");
 
@@ -149,7 +149,16 @@ namespace DeratControl.Infrastructure.Services.Reports
         private static string GetImgTag(byte[] image)
         {
             var base64 = Convert.ToBase64String(image);
-            return $@"<img height=""60"" width=""60"" src=""data:image/png;base64,{base64}""/>";
+            return $@"<img height=""200"" width=""200"" src=""data:image/png;base64,{base64}""/>";
+        }
+
+        public IReportBuilder AddSeal(byte[] signature)
+        {
+            contentBuilder.Append($@"<div style=""position:fixed;top:10px;right:10px;z-index:10;"">");
+            contentBuilder.Append(GetImgTag(signature));
+            contentBuilder.Append("</div>");
+
+            return this;
         }
     }
 }

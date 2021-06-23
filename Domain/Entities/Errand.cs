@@ -66,6 +66,12 @@ namespace Domain.Entities
                 DueDate = currentDate.Date;
         }
 
+        public int GetOverdueDays(DateTime currentDate)
+        {
+            var days = (currentDate.Date - DueDate.Date).Days;
+            return days < 0 ? 0 : days;
+        }
+
         public CompletedErrand Complete(
             DateTime completeDate, 
             string report, 

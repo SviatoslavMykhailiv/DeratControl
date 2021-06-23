@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Application.Common.Exceptions;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using Application.Common;
+using Application.Common.Models;
 
 namespace Application.Errands.Commands.GenerateReport
 {
@@ -22,7 +25,7 @@ namespace Application.Errands.Commands.GenerateReport
 
         public Guid ErrandId { get; }
 
-        public class GenerateReportCommandHandler : IRequestHandler<GenerateReportCommand, byte[]>
+        public class GenerateReportCommandHandler : BaseRequestHandler<GenerateReportCommand, byte[]>
         {
             private readonly IDeratControlDbContext db;
             private readonly IReportBuilder reportBuilder;
@@ -30,10 +33,12 @@ namespace Application.Errands.Commands.GenerateReport
             private readonly IFileStorage fileStorage;
 
             public GenerateReportCommandHandler(
-              IDeratControlDbContext db,
-              IReportBuilder reportBuilder,
-              IStringLocalizer<SharedResource> localizer,
-              IFileStorage fileStorage)
+                ICurrentUserProvider currentUserProvider,
+                ICurrentDateService currentDateService,
+                IDeratControlDbContext db,
+                IReportBuilder reportBuilder,
+                IStringLocalizer<SharedResource> localizer,
+                IFileStorage fileStorage) : base(currentDateService, currentUserProvider)
             {
                 this.db = db;
                 this.reportBuilder = reportBuilder;
@@ -41,16 +46,22 @@ namespace Application.Errands.Commands.GenerateReport
                 this.fileStorage = fileStorage;
             }
 
-            public async Task<byte[]> Handle(GenerateReportCommand request, CancellationToken cancellationToken)
+            protected override async Task<byte[]> Handle(RequestContext context, GenerateReportCommand request, CancellationToken cancellationToken)
             {
                 var errand = await GetErrand(request.ErrandId, cancellationToken) ?? throw new NotFoundException("Завдання не знайдено.");
+                var providerSignature = await fileStorage.ReadFile(Path.Combine("signatures", context.CurrentUser.UserId.ToString()));
+                var providerSeal = await fileStorage.ReadFile(Path.Combine("seals", context.CurrentUser.UserId.ToString()));
 
                 reportBuilder
                     .AddVerticalSpace()
                     .AddText(errand.Provider.ProviderName, Align.Center, 32)
+                    .AddSignature(providerSignature)
+                    .AddSeal(providerSeal)
                     .AddVerticalSpace()
                     .AddVerticalSpace()
                     .AddText(errand.Facility.GetInfo(), Align.Center, 24)
+                    .AddVerticalSpace()
+                    .AddText(errand.Description, Align.Center, 20)
                     .AddVerticalSpace();
 
                 foreach (var grouped in errand.PointReviewHistory

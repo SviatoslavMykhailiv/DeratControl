@@ -34,6 +34,7 @@ namespace Application.Errands.Queries
         public static ErrandDto Map(Errand errand, CurrentUser currentUser, DateTime currentDatetime)
         {
             var perimeters = errand.Facility.Perimeters.ToDictionary(p => p.Id);
+            var daysOverdue = currentUser.Role == UserRole.Employee ? 0 : errand.GetOverdueDays(currentDatetime);
 
             return new ErrandDto
             {
@@ -47,7 +48,7 @@ namespace Application.Errands.Queries
                 Address = errand.Facility.Address,
                 OnDemand = errand.OnDemand,
                 DueDate = GetDueDate(errand.DueDate, currentUser, currentDatetime).ToString("d"),
-                DaysOverdue = currentUser.Role == UserRole.Employee ? 0 : (currentDatetime.Date - errand.DueDate.Date).Days,
+                DaysOverdue = currentUser.Role == UserRole.Employee ? 0 : daysOverdue,
                 Points = errand.Points.Select(p => new PointReviewDto
                 {
                     PointId = p.PointId,
@@ -64,7 +65,7 @@ namespace Application.Errands.Queries
                         FieldType = r.FieldType,
                         OptionList = r.OptionList.ToArray()
                     }).ToList()
-                }).OrderBy(o => o.Order).ToList()
+                }).OrderBy(o => o.TrapId).OrderBy(o => o.Order).ToList()
             };
         }
     }

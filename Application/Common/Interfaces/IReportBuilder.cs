@@ -73,7 +73,8 @@ namespace Application.Common.Interfaces
         IReportBuilder AddVerticalSpace();
         IReportBuilder AddCheckbox(bool isChecked, string caption);
         IReportBuilder AddTable(Table table);
-        IReportBuilder AddSignature(byte[] signature, Align align);
+        IReportBuilder AddSignature(byte[] signature);
+        IReportBuilder AddSeal(byte[] signature);
         byte[] GetReport();
     }
 }

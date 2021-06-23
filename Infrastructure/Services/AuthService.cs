@@ -30,6 +30,8 @@ namespace Infrastructure.Services
         public const string FACILITY_ID_CLAIM = "derat-facility-id";
         public const string USER_FIRST_NAME_CLAIM = "derat-user-first-name";
         public const string USER_LAST_NAME_CLAIM = "derat-user-last-name";
+        public const string PROVIDER_NAME_CLAIM = "derat-provider-name";
+        public const string ENCRYPTION_KEY_CLAIM = "derat-encryption-key";
 
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
@@ -55,15 +57,19 @@ namespace Infrastructure.Services
             var user = await userManager.FindByNameAsync(userName);
             var userRole = await userManager.GetRolesAsync(user);
 
-            var claims = new List<Claim> { 
-                new Claim(USER_ID_CLAIM, user.Id.ToString()), 
-                new Claim(USER_ROLE_CLAIM, userRole.First()), 
-                new Claim(USER_NAME_CLAIM, userName), 
-                new Claim(USER_FIRST_NAME_CLAIM, user.FirstName), 
-                new Claim(USER_LAST_NAME_CLAIM, user.LastName) };
+            var claims = new List<Claim> {
+                new Claim(USER_ID_CLAIM, user.Id.ToString()),
+                new Claim(USER_ROLE_CLAIM, userRole.First()),
+                new Claim(USER_NAME_CLAIM, userName),
+                new Claim(USER_FIRST_NAME_CLAIM, user.FirstName),
+                new Claim(USER_LAST_NAME_CLAIM, user.LastName),
+                new Claim(ENCRYPTION_KEY_CLAIM, options.Value.QrCodeSymmetricEncryptionKey)};
 
             if (user.FacilityId.HasValue)
                 claims.Add(new Claim(FACILITY_ID_CLAIM, user.FacilityId.Value.ToString()));
+
+            if (string.IsNullOrEmpty(user.ProviderName) == false)
+                claims.Add(new Claim(PROVIDER_NAME_CLAIM, user.ProviderName));
 
             var now = DateTime.Now;
             var expires = DateTime.Now.Add(TimeSpan.FromHours(options.Value.LifeTime));

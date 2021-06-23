@@ -127,5 +127,12 @@ namespace Infrastructure.Services
               .Include(u => u.DefaultFacilities)
               .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken: cancellationToken);
         }
+
+        public async Task UpdateProviderName(Guid userId, string providerName)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString()) ?? throw new NotFoundException("Користувач не знайдений.");
+            user.ProviderName = providerName;
+            await userManager.UpdateAsync(user);
+        }
     }
 }
