@@ -10,5 +10,7 @@ namespace Application.Errands.Queries
         public string FieldName { get; init; }
         public FieldType FieldType { get; init; }
         public Option[] OptionList { get; init; }
+        public int PercentStep { get; init; }
+        public string Value { get; init; }
     }
 }

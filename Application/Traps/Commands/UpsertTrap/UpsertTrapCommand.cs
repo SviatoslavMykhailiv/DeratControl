@@ -72,7 +72,8 @@ namespace Application.Traps.Commands.UpsertTrap
                       inputField.FieldName,
                       inputField.Order,
                       inputField.FieldType,
-                      inputField.OptionList);
+                      inputField.OptionList,
+                      inputField.PercentStep);
 
                 await db.SaveChangesAsync(cancellationToken);
 

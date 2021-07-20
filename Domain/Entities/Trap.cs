@@ -29,13 +29,14 @@ namespace Domain.Entities
           string fieldName,
           int order,
           FieldType type,
-          Option[] optionList)
+          Option[] optionList,
+          int percentStep)
         {
 
             if (fieldId is null)
-                AddField(fieldName, order, type, optionList);
+                AddField(fieldName, order, type, optionList, percentStep);
             else
-                UpdateField(fieldId.Value, fieldName, order, type, optionList);
+                UpdateField(fieldId.Value, fieldName, order, type, optionList, percentStep);
         }
 
         public void RemoveField(Guid fieldId)
@@ -52,7 +53,8 @@ namespace Domain.Entities
           string fieldName,
           int order,
           FieldType type,
-          Option[] optionList)
+          Option[] optionList,
+          int percentStep)
         {
 
             if (fields.Any(f => string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase)))
@@ -66,7 +68,8 @@ namespace Domain.Entities
                 FieldName = fieldName,
                 Order = order,
                 FieldType = type,
-                OptionList = optionList
+                OptionList = optionList,
+                PercentStep = percentStep
             };
 
             fields.Add(field);
@@ -77,7 +80,8 @@ namespace Domain.Entities
           string fieldName,
           int order,
           FieldType type,
-          Option[] optionList)
+          Option[] optionList,
+          int percentStep)
         {
 
             if (fields.Any(f => string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase) && f.Id != fieldId))
@@ -92,6 +96,7 @@ namespace Domain.Entities
             field.Order = order;
             field.FieldType = type;
             field.OptionList = optionList;
+            field.PercentStep = percentStep;
         }
     }
 }

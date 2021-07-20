@@ -45,7 +45,21 @@ namespace Application.Errands.Queries
                     .Take(request.Take ?? 10)
                     .ToListAsync(cancellationToken: cancellationToken);
 
-                return new ItemList<ErrandDto> { Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime)), TotalCount = totalCount };
+                var points = errands.SelectMany(e => e.Points).Select(p => p.Point.Id).Distinct().ToList();
+
+                var completedPointReviews = await db.CompletedPointReviews
+                    .Include(c => c.Records)
+                    .Where(c => points.Contains(c.PointId))
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken);
+
+                var lastValueBucket = new LastValueBucket(completedPointReviews);
+
+                return new ItemList<ErrandDto> 
+                { 
+                    Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket)), 
+                    TotalCount = totalCount
+                };
             }
 
             private IQueryable<Errand> GetErrandsQuery()

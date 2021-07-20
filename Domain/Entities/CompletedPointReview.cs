@@ -1,5 +1,4 @@
 ﻿using Domain.Common;
-using Domain.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -14,9 +13,8 @@ namespace Domain.Entities
 
         }
 
-        public CompletedPointReview(Point point, PointReviewStatus status, string report)
+        public CompletedPointReview(Point point, string report)
         {
-            Status = status;
             Report = report;
             PointId = point.Id;
             Perimeter = point.Perimeter;
@@ -32,19 +30,18 @@ namespace Domain.Entities
         public Guid ErrandId { get; init; }
         public CompletedErrand Errand { get; init; }
         public Guid PointId { get; init; }
-        
+
         public Guid PerimeterId { get; init; }
         public Perimeter Perimeter { get; init; }
-        
+
         public int PointOrder { get; init; }
-        
+
         public Trap Trap { get; init; }
         public Guid TrapId { get; init; }
-        
+
         public Supplement Supplement { get; init; }
         public Guid SupplementId { get; init; }
-        
-        public PointReviewStatus Status { get; init; }
+
         public string Report { get; init; }
 
         public IEnumerable<PointReviewRecord> Records => records;

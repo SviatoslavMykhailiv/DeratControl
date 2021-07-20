@@ -9,13 +9,7 @@ namespace Domain.Entities
 {
     public class Field : AuditableEntity
     {
-        public static readonly HashSet<FieldType> OptionTypes = new HashSet<FieldType>
-        {
-            FieldType.Option,
-            FieldType.Percent
-        };
-
-        public bool IsOptionType => OptionTypes.Contains(FieldType);
+        public bool IsOptionType => FieldType == FieldType.Option;
 
         public Guid TrapId { get; init; }
         public string FieldName { get; set; }
@@ -27,9 +21,11 @@ namespace Domain.Entities
 
         public IEnumerable<Option> OptionList { get; set; } = new HashSet<Option>();
 
+        public int PercentStep { get; set; }
+
         public bool ContainsOption(string option)
         {
-            return OptionList.Any(c => c.Value == option);
+            return OptionList.Any(c => c.Name == option);
         }
     }
 }

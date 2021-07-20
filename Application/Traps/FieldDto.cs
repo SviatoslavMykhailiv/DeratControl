@@ -14,6 +14,7 @@ namespace Application.Traps
         public FieldType FieldType { get; init; }
         public Option[] OptionList { get; init; }
         public int Order { get; init; }
+        public int PercentStep { get; init; }
 
         public void Mapping(Profile profile)
         {

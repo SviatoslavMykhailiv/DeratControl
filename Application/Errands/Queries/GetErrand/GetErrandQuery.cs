@@ -39,7 +39,7 @@ namespace Application.Errands.Queries.GetErrand
                 if (errand is null)
                     throw new NotFoundException("Завдання не знайдено.");
 
-                return ErrandDto.Map(errand, context.CurrentUser, context.CurrentDateTime);
+                return ErrandDto.Map(errand, context.CurrentUser, context.CurrentDateTime, new LastValueBucket());
             }
 
             private Task<Errand> GetErrandsQuery(Guid errandId)
