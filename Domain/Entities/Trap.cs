@@ -56,13 +56,6 @@ namespace Domain.Entities
           Option[] optionList,
           int percentStep)
         {
-
-            if (fields.Any(f => string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase)))
-                throw new InvalidOperationException($"Field with name {fieldName} already exists.");
-
-            if (fields.Any(f => f.Order == order))
-                throw new InvalidOperationException($"Field with order {order} already exists.");
-
             var field = new Field
             {
                 FieldName = fieldName,
@@ -83,13 +76,6 @@ namespace Domain.Entities
           Option[] optionList,
           int percentStep)
         {
-
-            if (fields.Any(f => string.Equals(f.FieldName, fieldName, StringComparison.OrdinalIgnoreCase) && f.Id != fieldId))
-                throw new InvalidOperationException($"Field with name {fieldName} already exists.");
-
-            if (fields.Any(f => f.Order == order && f.Id != fieldId))
-                throw new InvalidOperationException($"Field with order {order} already exists.");
-
             var field = fields.First(f => f.Id == fieldId);
 
             field.FieldName = fieldName;
