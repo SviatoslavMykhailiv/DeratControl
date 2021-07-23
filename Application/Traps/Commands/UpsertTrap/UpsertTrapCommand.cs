@@ -75,6 +75,8 @@ namespace Application.Traps.Commands.UpsertTrap
                       inputField.OptionList,
                       inputField.PercentStep);
 
+                trap.AssertFieldsUnique();
+
                 await db.SaveChangesAsync(cancellationToken);
 
                 cache.Remove($"{nameof(Trap)}-{context.CurrentUser.UserId}");

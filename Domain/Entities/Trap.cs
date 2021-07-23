@@ -98,5 +98,13 @@ namespace Domain.Entities
             field.OptionList = optionList;
             field.PercentStep = percentStep;
         }
+
+        public void AssertFieldsUnique()
+        {
+            var unique = fields.Distinct(new FieldComparer()).Count().Equals(fields.Count);
+
+            if (unique == false)
+                throw new InvalidOperationException("Усі поля мають бути унікальні за назвою та порядковим номером.");
+        }
     }
 }
