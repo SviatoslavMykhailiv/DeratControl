@@ -27,5 +27,18 @@ namespace Domain.Entities
         {
             return OptionList.Any(c => c.Name == option);
         }
+
+        public string ToStringValue(string value) 
+        {
+            switch (FieldType)
+            {
+                case FieldType.Boolean:
+                    return Convert.ToBoolean(int.Parse(value)) ? "Так" : "Ні";
+                case FieldType.Percent:
+                    return $"{value}%";
+            }
+
+            return value;
+        }
     }
 }
