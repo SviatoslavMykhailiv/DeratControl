@@ -39,17 +39,17 @@ namespace Application.Points.Queries.PointReviewHistory
 
                 var history = new List<PointReviewHistoryRecord>();
 
-                foreach (var point in reviewHistory)
+                foreach (var point in reviewHistory.OrderByDescending(r => r.Errand.CompleteDate))
                 {
                     var record = new PointReviewHistoryRecord
                     {
                         ReviewDate = point.Errand.CompleteDate.ToShortDateString(),
                         Employee = point.Errand.Employee.GetFullName(),
-                        Records = point.Records.Select(r => new PointRecord 
+                        Records = point.Records.Select(r => new PointRecord
                         {
                             FieldName = r.Field.FieldName,
                             Value = r.Field.ToStringValue(r.Value)
-                        }).ToList()
+                        }).OrderBy(r => r.FieldName).ToList()
                     };
 
                     history.Add(record);
