@@ -48,7 +48,7 @@ namespace Application.Points.Queries.PointReviewHistory
                         Records = point.Records.Select(r => new PointRecord
                         {
                             FieldName = r.Field.FieldName,
-                            Value = r.Field.ToStringValue(r.Value)
+                            Value = r.Field.ToPrintFormat(r.Value)
                         }).OrderBy(r => r.FieldName).ToList()
                     };
 

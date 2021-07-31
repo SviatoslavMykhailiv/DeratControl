@@ -1,5 +1,4 @@
-﻿using Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Domain.Entities
@@ -24,7 +23,9 @@ namespace Domain.Entities
 
             foreach (var field in Point.Trap.Fields)
             {
-                result.AddRecord(field, valueDictionary.GetValueOrDefault(field.Id));
+                var value = valueDictionary.GetValueOrDefault(field.Id);
+                result.AddRecord(field, value);
+                Point.SetFieldValue(field.Id, value);
             }
 
             return result;

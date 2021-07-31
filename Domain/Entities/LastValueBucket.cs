@@ -1,34 +1,24 @@
-﻿using System;
+﻿using Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Domain.Entities
 {
     public class LastValueBucket
     {
-        private readonly Dictionary<Guid, Dictionary<Guid, string>> values = new Dictionary<Guid, Dictionary<Guid, string>>();
+        private readonly Dictionary<PointFieldKey, string> values = new Dictionary<PointFieldKey, string>();
 
         public LastValueBucket()
         {
 
         }
 
-        public LastValueBucket(IEnumerable<CompletedPointReview> reviews)
+        public LastValueBucket(IEnumerable<PointFieldValue> values)
         {
-            foreach (var group in reviews.GroupBy(c => c.PointId))
+            foreach (var value in values)
             {
-                var latest = group.OrderByDescending(c => c.ModifiedAt).FirstOrDefault();
-
-                if (latest is null) continue;
-
-                var recordDic = new Dictionary<Guid, string>();
-
-                foreach (var record in latest.Records)
-                {
-                    recordDic.Add(record.FieldId, record.Value);
-                }
-
-                values.Add(group.Key, recordDic);
+                var key = new PointFieldKey { PointId = value.PointId, FieldId = value.FieldId };
+                this.values[key] = value.Value;
             }
         }
 
@@ -36,24 +26,8 @@ namespace Domain.Entities
         {
             get
             {
-                if(values.ContainsKey(pointId) == false)
-                {
-                    return string.Empty;
-                }
-
-                var records = values[pointId];
-
-                if(records.Count == 0)
-                {
-                    return string.Empty;
-                }
-
-                if(records.ContainsKey(fieldId) == false)
-                {
-                    return string.Empty;
-                }
-
-                return records[fieldId];
+                var key = new PointFieldKey { PointId = pointId, FieldId = fieldId };
+                return values.ContainsKey(key) ? values[key] : string.Empty;
             }
         }
     }

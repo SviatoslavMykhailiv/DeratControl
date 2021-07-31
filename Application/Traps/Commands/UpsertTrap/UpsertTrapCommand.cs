@@ -73,7 +73,8 @@ namespace Application.Traps.Commands.UpsertTrap
                       inputField.Order,
                       inputField.FieldType,
                       inputField.OptionList,
-                      inputField.PercentStep);
+                      inputField.PercentStep,
+                      inputField.AdminEditable);
 
                 trap.AssertFieldsUnique();
 

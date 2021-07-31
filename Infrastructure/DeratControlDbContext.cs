@@ -50,6 +50,8 @@ namespace Infrastructure
 
         public DbSet<Point> Points { get; set; }
 
+        public DbSet<PointFieldValue> PointFieldValues { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

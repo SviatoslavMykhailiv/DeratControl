@@ -47,13 +47,12 @@ namespace Application.Errands.Queries
 
                 var points = errands.SelectMany(e => e.Points).Select(p => p.Point.Id).Distinct().ToList();
 
-                var completedPointReviews = await db.CompletedPointReviews
-                    .Include(c => c.Records)
+                var values = await db.PointFieldValues
                     .Where(c => points.Contains(c.PointId))
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken);
 
-                var lastValueBucket = new LastValueBucket(completedPointReviews);
+                var lastValueBucket = new LastValueBucket(values);
 
                 return new ItemList<ErrandDto> 
                 { 

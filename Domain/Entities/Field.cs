@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
-using Domain.Enums;
 using Domain.ValueObjects;
+using Domain.ValueObjects.FieldTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +9,10 @@ namespace Domain.Entities
 {
     public class Field : AuditableEntity
     {
-        public bool IsOptionType => FieldType == FieldType.Option;
-
         public Guid TrapId { get; init; }
         public string FieldName { get; set; }
         public int Order { get; set; }
+        public bool AdminEditable { get; set; }
 
         public FieldType FieldType { get; set; }
 
@@ -28,20 +27,8 @@ namespace Domain.Entities
             return OptionList.Any(c => c.Name == option);
         }
 
-        public string ToStringValue(string value)
-        {
-            switch (FieldType)
-            {
-                case FieldType.Boolean:
-                    if (string.IsNullOrWhiteSpace(value))
-                        return "Ні";
+        public string ToPrintFormat(string value) => FieldType.ToPrintFormat(this, value);
 
-                    return Convert.ToBoolean(int.Parse(value)) ? "Так" : "Ні";
-                case FieldType.Percent:
-                    return $"{value}%";
-            }
-
-            return value;
-        }
+        public string AdjustValue(string value) => FieldType.AdjustValue(this, value);
     }
 }

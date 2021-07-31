@@ -1,6 +1,6 @@
 ﻿using Domain.Common;
-using Domain.Enums;
 using Domain.ValueObjects;
+using Domain.ValueObjects.FieldTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,13 +30,14 @@ namespace Domain.Entities
           int order,
           FieldType type,
           Option[] optionList,
-          int percentStep)
+          int percentStep,
+          bool adminEditable)
         {
 
             if (fieldId is null)
-                AddField(fieldName, order, type, optionList, percentStep);
+                AddField(fieldName, order, type, optionList, percentStep, adminEditable);
             else
-                UpdateField(fieldId.Value, fieldName, order, type, optionList, percentStep);
+                UpdateField(fieldId.Value, fieldName, order, type, optionList, percentStep, adminEditable);
         }
 
         public void RemoveField(Guid fieldId)
@@ -54,7 +55,8 @@ namespace Domain.Entities
           int order,
           FieldType type,
           Option[] optionList,
-          int percentStep)
+          int percentStep,
+          bool adminEditable)
         {
             var field = new Field
             {
@@ -62,7 +64,8 @@ namespace Domain.Entities
                 Order = order,
                 FieldType = type,
                 OptionList = optionList,
-                PercentStep = percentStep
+                PercentStep = percentStep,
+                AdminEditable = adminEditable
             };
 
             fields.Add(field);
@@ -74,7 +77,8 @@ namespace Domain.Entities
           int order,
           FieldType type,
           Option[] optionList,
-          int percentStep)
+          int percentStep,
+          bool adminEditable)
         {
             var field = fields.First(f => f.Id == fieldId);
 
@@ -83,6 +87,7 @@ namespace Domain.Entities
             field.FieldType = type;
             field.OptionList = optionList;
             field.PercentStep = percentStep;
+            field.AdminEditable = adminEditable;
         }
 
         public void AssertFieldsUnique()

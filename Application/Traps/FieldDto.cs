@@ -11,15 +11,17 @@ namespace Application.Traps
     {
         public Guid? FieldId { get; init; }
         public string FieldName { get; init; }
-        public FieldType FieldType { get; init; }
+        public byte FieldType { get; init; }
         public Option[] OptionList { get; init; }
         public int Order { get; init; }
         public int PercentStep { get; init; }
+        public bool AdminEditable { get; init; }
 
         public void Mapping(Profile profile)
         {
             profile.CreateMap<Field, FieldDto>()
               .ForMember(dest => dest.FieldId, opt => opt.MapFrom(src => src.Id))
+              .ForMember(dest => dest.FieldType, opt => opt.MapFrom(src => (byte)src.FieldType))
               .ForMember(dest => dest.OptionList, opt => opt.MapFrom(src => src.OptionList ?? Array.Empty<Option>()));
         }
     }

@@ -93,6 +93,9 @@ namespace Application.Errands.Commands.CompleteErrand
                   .ThenInclude(p => p.Point)
                   .ThenInclude(p => p.Trap)
                   .ThenInclude(p => p.Fields)
+                  .Include(e => e.Points)
+                  .ThenInclude(p => p.Point)
+                  .ThenInclude(p => p.Values)
                   .FirstOrDefaultAsync(e => e.Id == errandId && e.EmployeeId == employeeId);
             }
 

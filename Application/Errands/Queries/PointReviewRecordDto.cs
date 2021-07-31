@@ -8,7 +8,7 @@ namespace Application.Errands.Queries
     {
         public Guid FieldId { get; init; }
         public string FieldName { get; init; }
-        public FieldType FieldType { get; init; }
+        public byte FieldType { get; init; }
         public Option[] OptionList { get; init; }
         public int PercentStep { get; init; }
         public string Value { get; init; }

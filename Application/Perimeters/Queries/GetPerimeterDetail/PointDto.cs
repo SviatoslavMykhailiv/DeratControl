@@ -2,6 +2,7 @@
 using AutoMapper;
 using Domain.Entities;
 using System;
+using System.Collections.Generic;
 
 namespace Application.Perimeters.Queries.GetPerimeterDetail
 {
@@ -13,11 +14,13 @@ namespace Application.Perimeters.Queries.GetPerimeterDetail
         public int TopLoc { get; set; }
         public Guid SupplementId { get; set; }
         public Guid TrapId { get; set; }
+        public IReadOnlyCollection<PointFieldValueDTO> Records { get; set; } = new List<PointFieldValueDTO>();
 
         public void Mapping(Profile profile)
         {
             profile.CreateMap<Point, PointDto>()
-              .ForMember(dest => dest.PointId, opt => opt.MapFrom(src => src.Id));
+              .ForMember(dest => dest.PointId, opt => opt.MapFrom(src => src.Id))
+              .ForMember(dest => dest.Records, opt => opt.MapFrom(src => src.Values));
         }
     }
 }

@@ -48,6 +48,7 @@ namespace Application.Perimeters.Commands.UpsertPerimeter
                     perimeter = await context
                       .Perimeters
                       .Include(p => p.Points)
+                      .ThenInclude(p => p.Values)
                       .FirstOrDefaultAsync(p => p.Id == request.PerimeterId, cancellationToken: cancellationToken);
                 }
                 else
@@ -58,8 +59,6 @@ namespace Application.Perimeters.Commands.UpsertPerimeter
 
                 var supplements = await GetSupplements();
                 var traps = await GetTraps();
-
-
 
                 perimeter.LeftLoc = request.LeftLoc;
                 perimeter.TopLoc = request.TopLoc;
@@ -84,21 +83,28 @@ namespace Application.Perimeters.Commands.UpsertPerimeter
                 }
 
                 foreach (var point in request.Points)
+                {
+                    var values = new Dictionary<Guid, string>();
+
+                    foreach (var value in point.Records)
+                        values[value.Field.FieldId.Value] = value.Value;
+
                     perimeter.SetPoint(
                       point.PointId,
                       point.Order,
                       point.LeftLoc,
                       point.TopLoc,
                       traps[point.TrapId],
-                      supplements[point.SupplementId]);
+                      supplements[point.SupplementId], 
+                      values);
+                }
 
                 await context.SaveChangesAsync(cancellationToken);
-
 
                 return perimeter.Id;
             }
 
-            private Task<Dictionary<Guid, Trap>> GetTraps() => context.Traps.ToDictionaryAsync(s => s.Id);
+            private Task<Dictionary<Guid, Trap>> GetTraps() => context.Traps.Include(t => t.Fields).ToDictionaryAsync(s => s.Id);
             private Task<Dictionary<Guid, Supplement>> GetSupplements() => context.Supplements.ToDictionaryAsync(s => s.Id);
             private ValueTask<Facility> GetFacility(Guid facilityId, CancellationToken cancellationToken) =>
               context.Facilities.FindAsync(new object[] { facilityId }, cancellationToken);

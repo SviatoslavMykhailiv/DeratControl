@@ -23,12 +23,17 @@ namespace Domain.Entities
 
         public string SchemeImagePath { get; private set; }
 
-        public void SetPoint(Guid? pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement)
+        public void SetPoint(Guid? pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement, Dictionary<Guid, string> values)
         {
+            Point point;
+
             if (pointId.HasValue)
-                UpdatePoint(pointId.Value, order, leftLoc, topLoc, trap, supplement);
+                point = UpdatePoint(pointId.Value, order, leftLoc, topLoc, trap, supplement);
             else
-                AddPoint(order, leftLoc, topLoc, trap, supplement);
+                point = AddPoint(order, leftLoc, topLoc, trap, supplement);
+
+            foreach (var value in values)
+                point.SetFieldValue(value.Key, value.Value);
         }
 
         public void RemovePoint(Guid pointId)
@@ -41,7 +46,12 @@ namespace Domain.Entities
             SchemeImagePath = Path.Combine("perimeters", "schemes", $"{Id}.{format}");
         }
 
-        private void AddPoint(int order, int leftLoc, int topLoc, Trap trap, Supplement supplement)
+        private Point AddPoint(
+            int order, 
+            int leftLoc, 
+            int topLoc, 
+            Trap trap, 
+            Supplement supplement)
         {
             if (points.Any(p => p.Order == order && p.Trap == trap && p.Supplement == supplement))
                 throw new InvalidOperationException($"Point with order {order} already exists.");
@@ -57,9 +67,17 @@ namespace Domain.Entities
             };
 
             points.Add(point);
+
+            return point;
         }
 
-        private void UpdatePoint(Guid pointId, int order, int leftLoc, int topLoc, Trap trap, Supplement supplement)
+        private Point UpdatePoint(
+            Guid pointId, 
+            int order, 
+            int leftLoc, 
+            int topLoc, 
+            Trap trap, 
+            Supplement supplement)
         {
             if (points.Any(p => p.Order == order && p.Trap == trap && p.Supplement == supplement && p.Id != pointId))
                 throw new InvalidOperationException($"Point with order {order} already exists.");
@@ -71,6 +89,8 @@ namespace Domain.Entities
             point.TopLoc = topLoc;
             point.Trap = trap;
             point.Supplement = supplement;
+
+            return point;
         }
 
         public byte[] GeneratePerimeterImage(byte[] image)

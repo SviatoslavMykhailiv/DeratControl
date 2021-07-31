@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.ValueObjects;
+using Domain.ValueObjects.FieldTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json;
@@ -17,6 +18,10 @@ namespace Infrastructure.Configurations
 
             builder.Property(c => c.OptionList)
                 .HasConversion(c => JsonConvert.SerializeObject(c), c => JsonConvert.DeserializeObject<IEnumerable<Option>>(c) ?? Enumerable.Empty<Option>());
+
+            builder.Property(c => c.FieldType)
+                .HasConversion(c => c.Id, c => FieldType.ToFieldType(c));
+
         }
     }
 }

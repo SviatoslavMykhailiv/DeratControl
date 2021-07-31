@@ -15,6 +15,7 @@ namespace Domain.Entities
         private Supplement supplement;
 
         private readonly HashSet<PointReview> reviews = new HashSet<PointReview>();
+        private readonly HashSet<PointFieldValue> values = new HashSet<PointFieldValue>();
 
         public Guid PerimeterId { get; init; }
         public Guid TrapId { get; set; }
@@ -50,7 +51,32 @@ namespace Domain.Entities
                 if (pointWithSameTrapExists)
                     throw new InvalidOperationException($"Point with trap {value} already exists.");
 
+                if(trap != value)
+                {
+                    values.Clear();
+                }
+
                 trap = value;
+            }
+        }
+
+        public void SetFieldValue(Guid fieldId, string value) 
+        {
+            var field = trap.Fields.FirstOrDefault(f => f.Id == fieldId) ?? throw new InvalidOperationException("Поле не знайдено.");
+
+            if (field.AdminEditable == false)
+                return;
+
+            var fieldValue = values.FirstOrDefault(v => v.FieldId == fieldId);
+
+            if(fieldValue is null)
+            {
+                fieldValue = new PointFieldValue { Point = this, Field = field, Value = value };
+                values.Add(fieldValue);
+            }
+            else
+            {
+                fieldValue.Value = field.AdjustValue(value);
             }
         }
 
@@ -71,6 +97,8 @@ namespace Domain.Entities
         public Perimeter Perimeter { get; init; }
 
         public IEnumerable<PointReview> Reviews => reviews;
+
+        public IEnumerable<PointFieldValue> Values => values;
 
         public QRID GetIdentifier() => new QRID(PerimeterId, Order, TrapId);
     }

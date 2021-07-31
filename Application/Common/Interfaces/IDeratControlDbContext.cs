@@ -17,6 +17,7 @@ namespace Application.Common.Interfaces
         DbSet<CompletedErrand> CompletedErrands { get; }
         DbSet<CompletedPointReview> CompletedPointReviews { get; }
         DbSet<Point> Points { get; }
+        DbSet<PointFieldValue> PointFieldValues { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }
