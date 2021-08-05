@@ -54,9 +54,10 @@ namespace Infrastructure.Services
 
                 foreach (var code in identifier)
                 {
+                    var qrName = $"№{code.Order}, {traps[code.TrapId].TrapName}";
                     var imgTag = $@"
                             <div style=""display:inline-block; margin-right:5px; margin-left:5px;"">
-                              <div style=""text-align:center; margin-bottom:2px;"">Пастка №{code.Order}, {traps[code.TrapId].TrapName}</div>
+                              <div style=""text-align:center; margin-bottom:2px;"">{qrName}</div>
                               {GetImgTag(qrCodeService.Generate(encryptionService.Encrypt(code)))}
                             </div>";
 
@@ -108,10 +109,11 @@ namespace Infrastructure.Services
                 var identifier = $"{perimeter.Id}&{point.Order}&{point.TrapId}";
                 var trapName = traps[point.TrapId].TrapName;
                 var qr = encryptionService.Encrypt(identifier);
+                var qrName = $"№{point.Order}, {trapName}";
 
                 var imgTag = $@"
                             <div style=""display:inline-block; margin-right:5px; margin-left:5px;"">
-                              <div style=""text-align:center; margin-bottom:2px;"">Пастка №{point.Order}, {trapName}</div>
+                              <div style=""text-align:center; margin-bottom:2px;"">{qrName}</div>
                               {GetImgTag(qrCodeService.Generate(qr))}
                             </div>";
 

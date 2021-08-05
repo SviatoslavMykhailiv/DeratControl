@@ -57,6 +57,8 @@ namespace Infrastructure.Services
             var user = await userManager.FindByNameAsync(userName);
             var userRole = await userManager.GetRolesAsync(user);
 
+            AssertEmployeeActive(user, userRole);
+
             var claims = new List<Claim> {
                 new Claim(USER_ID_CLAIM, user.Id.ToString()),
                 new Claim(USER_ROLE_CLAIM, userRole.First()),
@@ -80,6 +82,14 @@ namespace Infrastructure.Services
                                            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(options.Value.SecurityKey)), SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
+        }
+
+        private void AssertEmployeeActive(ApplicationUser user, IList<string> roles)
+        {
+            if (roles.Contains("EMPLOYEE") && user.Available == false) 
+            {
+                throw new BadRequestException("Неможливо увійти у систему. Користувач деактивований.");
+            }
         }
     }
 }

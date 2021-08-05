@@ -64,7 +64,8 @@ namespace Application.Errands.Queries
                         FieldName = r.FieldName,
                         FieldType = r.FieldType,
                         OptionList = r.OptionList.ToArray(),
-                        Value = lastValueBucket[p.PointId, r.Id]
+                        Value = lastValueBucket[p.PointId, r.Id],
+                        PercentStep = r.PercentStep
                     }).ToList()
                 }).OrderBy(o => o.TrapId).OrderBy(o => o.Order).ToList()
             };
