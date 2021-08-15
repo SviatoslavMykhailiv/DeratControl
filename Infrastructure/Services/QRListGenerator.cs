@@ -106,7 +106,7 @@ namespace Infrastructure.Services
 
             foreach (var point in points)
             {
-                var identifier = $"{perimeter.Id}&{point.Order}&{point.TrapId}";
+                var identifier = $"{perimeter.FacilityId}&{perimeter.Id}&{point.Order}&{point.TrapId}";
                 var trapName = traps[point.TrapId].TrapName;
                 var qr = encryptionService.Encrypt(identifier);
                 var qrName = $"№{point.Order}, {trapName}";

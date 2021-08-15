@@ -99,7 +99,5 @@ namespace Domain.Entities
         public IEnumerable<PointReview> Reviews => reviews;
 
         public IEnumerable<PointFieldValue> Values => values;
-
-        public QRID GetIdentifier() => new QRID(PerimeterId, Order, TrapId);
     }
 }

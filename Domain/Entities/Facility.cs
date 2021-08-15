@@ -38,7 +38,7 @@ namespace Domain.Entities
             foreach (var perimeter in perimeters.Where(c => perimeterList.Contains(c.Id)))
                 foreach (var trap in trapList)
                     foreach (var order in Enumerable.Range(1, count))
-                        yield return new QRID(perimeter.Id, order, trap.Id);
+                        yield return new QRID(Id, perimeter.Id, order, trap.Id);
         }
 
         public Perimeter GetPerimeter(Guid perimeterId) => perimeters.FirstOrDefault(p => p.Id == perimeterId);
