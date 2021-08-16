@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Domain.Entities;
 using Application.Common.Dtos;
+using System.Collections.Generic;
+using System;
 
 namespace Application.Errands.Queries
 {
@@ -30,7 +32,9 @@ namespace Application.Errands.Queries
             {
                 var query = GetErrandsQuery(context.CurrentUser);
 
-                var errands = await query.ToListAsync(cancellationToken: cancellationToken);
+                var errands = FilterExpired(await query.ToListAsync(cancellationToken: cancellationToken), context.CurrentDateTime)
+                    .OrderByDescending(e => e.DueDate)
+                    .ToList();
 
                 var points = errands.SelectMany(e => e.Points).Select(p => p.Point.Id).Distinct().ToList();
 
@@ -63,6 +67,25 @@ namespace Application.Errands.Queries
                   .OrderByDescending(e => e.DueDate)
                   .Take(5)
                   .AsNoTracking();
+            }
+
+            private static IEnumerable<Errand> FilterExpired(List<Errand> errands, DateTime currentDate) 
+            {
+                var grouped = errands.GroupBy(e => e.Facility);
+
+                foreach (var group in grouped)
+                {
+                    foreach (var item in group.Where(i => i.DueDate > currentDate))
+                        yield return item;
+
+                    var latestExpired = group
+                        .Where(i => i.DueDate < currentDate)
+                        .OrderByDescending(c => c.DueDate)
+                        .FirstOrDefault();
+
+                    if (latestExpired is not null)
+                        yield return latestExpired;
+                }
             }
         }
 
