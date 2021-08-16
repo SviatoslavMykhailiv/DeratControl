@@ -20,6 +20,7 @@ namespace Application.Errands.Queries
         public string DueDate { get; init; }
         public int DaysOverdue { get; init; }
         public bool OnDemand { get; init; }
+        public bool Abandoned { get; init; }
 
         public ICollection<PointReviewDto> Points { get; init; } = new List<PointReviewDto>();
 
@@ -31,7 +32,7 @@ namespace Application.Errands.Queries
             return dueDate.Date < currentDatetime.Date ? currentDatetime.Date : dueDate.Date;
         }
 
-        public static ErrandDto Map(Errand errand, CurrentUser currentUser, DateTime currentDatetime, LastValueBucket lastValueBucket)
+        public static ErrandDto Map(Errand errand, CurrentUser currentUser, DateTime currentDatetime, LastValueBucket lastValueBucket, bool abandoned)
         {
             var perimeters = errand.Facility.Perimeters.ToDictionary(p => p.Id);
             var daysOverdue = currentUser.Role == UserRole.Employee ? 0 : errand.GetOverdueDays(currentDatetime);
@@ -49,6 +50,7 @@ namespace Application.Errands.Queries
                 OnDemand = errand.OnDemand,
                 DueDate = GetDueDate(errand.DueDate, currentUser, currentDatetime).ToString("d"),
                 DaysOverdue = currentUser.Role == UserRole.Employee ? 0 : daysOverdue,
+                Abandoned = abandoned,
                 Points = errand.Points.Select(p => new PointReviewDto
                 {
                     PointId = p.PointId,

@@ -5,6 +5,7 @@ using Application.Common.Models;
 using Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,9 +55,22 @@ namespace Application.Errands.Queries
 
                 var lastValueBucket = new LastValueBucket(values);
 
+                var items = new List<ErrandDto>();
+
+                foreach(var group in errands.GroupBy(e => new { e.FacilityId, e.EmployeeId }))
+                {
+                    var notExpired = group.Where(e => e.DueDate >= context.CurrentDateTime);
+                    items.AddRange(notExpired.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)));
+
+                    var expired = group.Where(e => e.DueDate < context.CurrentDateTime).OrderByDescending(e => e.DueDate);
+
+                    items.AddRange(expired.Take(1).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)));
+                    items.AddRange(expired.Skip(1).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, true)));
+                }
+
                 return new ItemList<ErrandDto> 
                 { 
-                    Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket)), 
+                    Items = items, 
                     TotalCount = totalCount
                 };
             }

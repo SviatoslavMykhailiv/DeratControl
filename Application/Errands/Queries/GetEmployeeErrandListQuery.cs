@@ -47,7 +47,7 @@ namespace Application.Errands.Queries
 
                 return new ItemList<ErrandDto> 
                 {
-                    Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket)), 
+                    Items = errands.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)), 
                     TotalCount = errands.Count 
                 };
             }
