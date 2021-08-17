@@ -52,18 +52,10 @@ namespace Domain.Entities
 
         public IEnumerable<PointReview> Points => points;
 
-        public bool IsOverdue(DateTime currentDate) => DueDate.Date < currentDate.Date;
-
         public void SetDueDate(DateTime dueDate)
         {
             DueDate = dueDate.Date;
             OriginalDueDate = dueDate.Date;
-        }
-
-        public void MoveDueDate(DateTime currentDate)
-        {
-            if (IsOverdue(currentDate))
-                DueDate = currentDate.Date;
         }
 
         public int GetOverdueDays(DateTime currentDate)
@@ -102,5 +94,7 @@ namespace Domain.Entities
         }
 
         public bool IsSecurityCodeValid(string securityCode) => string.Equals(securityCode, Facility.SecurityCode, StringComparison.OrdinalIgnoreCase);
+
+        public bool Expired(DateTime currentDatatime) => DueDate.Date < currentDatatime.Date;
     }
 }

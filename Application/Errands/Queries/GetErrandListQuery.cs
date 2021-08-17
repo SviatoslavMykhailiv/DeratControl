@@ -59,13 +59,15 @@ namespace Application.Errands.Queries
 
                 foreach(var group in errands.GroupBy(e => new { e.FacilityId, e.EmployeeId }))
                 {
-                    var notExpired = group.Where(e => e.DueDate >= context.CurrentDateTime);
-                    items.AddRange(notExpired.Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)));
+                    var notExpired = group.Where(e => e.Expired(context.CurrentDateTime) == false);
+                    items.AddRange(notExpired.OrderByDescending(e => e.DueDate).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)));
 
-                    var expired = group.Where(e => e.DueDate < context.CurrentDateTime).OrderByDescending(e => e.DueDate);
+                    var expired = group.Except(notExpired).OrderByDescending(e => e.DueDate);
 
-                    items.AddRange(expired.Take(1).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)));
-                    items.AddRange(expired.Skip(1).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, true)));
+                    var shift = notExpired.Any(e => e.DueDate.Date == context.CurrentDateTime.Date) ? 0 : 1;
+
+                    items.AddRange(expired.OrderByDescending(e => e.DueDate).Take(shift).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, false)));
+                    items.AddRange(expired.OrderByDescending(e => e.DueDate).Skip(shift).Select(e => ErrandDto.Map(e, context.CurrentUser, context.CurrentDateTime, lastValueBucket, true)));
                 }
 
                 return new ItemList<ErrandDto> 
