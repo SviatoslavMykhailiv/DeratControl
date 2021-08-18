@@ -52,13 +52,12 @@ namespace API
             services.AddMemoryCache();
             services.Configure<RequestLocalizationOptions>(options =>
             {
-                var supportedCultures = new List<CultureInfo> {
-            new("en-US"),
-            new("uk-UA"),
-            new("ru-RU")
-        };
+                var supportedCultures = new List<CultureInfo>
+                {
+                    new("en-US")
+                };
 
-                options.DefaultRequestCulture = new RequestCulture("uk-UA");
+                options.DefaultRequestCulture = new RequestCulture("en-US");
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
             });
