@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace Infrastructure.Services
 {
@@ -45,7 +46,7 @@ namespace Infrastructure.Services
 
             var pdf = new HtmlToPdfDocument() { GlobalSettings = globalSettings };
 
-            foreach (var identifier in qrIdList.OrderBy(i => i.PerimeterId).GroupBy(i => i.PerimeterId))
+            foreach (var identifier in qrIdList.OrderBy(i => i.Pi).GroupBy(i => i.Pi))
             {
                 var sheetBuilder = new StringBuilder();
                 sheetBuilder.Append(@"<!DOCTYPE html><html><head><meta charset=""utf-8""/></head><body>");
@@ -54,11 +55,12 @@ namespace Infrastructure.Services
 
                 foreach (var code in identifier)
                 {
-                    var qrName = $"№{code.Order}, {traps[code.TrapId].TrapName}";
+                    var qrName = $"№{code.Or}, {traps[code.Ti].TrapName}";
+                    var qr = encryptionService.Encrypt(JsonSerializer.Serialize(code, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
                     var imgTag = $@"
                             <div style=""display:inline-block; margin-right:5px; margin-left:5px;"">
                               <div style=""text-align:center; margin-bottom:2px;"">{qrName}</div>
-                              {GetImgTag(qrCodeService.Generate(encryptionService.Encrypt(code)))}
+                              {GetImgTag(qrCodeService.Generate(qr))}
                             </div>";
 
                     sheetBuilder.Append(imgTag);
@@ -106,7 +108,8 @@ namespace Infrastructure.Services
 
             foreach (var point in points)
             {
-                var identifier = $"{perimeter.FacilityId}&{perimeter.Id}&{point.Order}&{point.TrapId}";
+                var identifier = JsonSerializer.Serialize(new QRID(perimeter.FacilityId, perimeter.Id, point.Order, point.TrapId), new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
                 var trapName = traps[point.TrapId].TrapName;
                 var qr = encryptionService.Encrypt(identifier);
                 var qrName = $"№{point.Order}, {trapName}";

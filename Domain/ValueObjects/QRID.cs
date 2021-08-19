@@ -6,22 +6,15 @@ namespace Domain.ValueObjects
     {
         public QRID(Guid facilityId, Guid perimeterId, int order, Guid trapId)
         {
-            FacilityId = facilityId;
-            PerimeterId = perimeterId;
-            Order = order;
-            TrapId = trapId;
+            Oi = facilityId;
+            Pi = perimeterId;
+            Or = order;
+            Ti = trapId;
         }
 
-        public Guid FacilityId { get; }
-        public Guid PerimeterId { get; }
-        public int Order { get; }
-        public Guid TrapId { get; }
-
-        public override string ToString()
-        {
-            return $"{FacilityId}&{PerimeterId}&{Order}&{TrapId}";
-        }
-
-        public static implicit operator string(QRID id) => id.ToString();
+        public Guid Oi { get; }
+        public Guid Pi { get; }
+        public int Or { get; }
+        public Guid Ti { get; }
     }
 }
