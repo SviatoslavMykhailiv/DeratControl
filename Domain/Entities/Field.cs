@@ -22,11 +22,6 @@ namespace Domain.Entities
 
         public int PercentStep { get; set; }
 
-        public bool ContainsOption(string option)
-        {
-            return OptionList.Any(c => c.Name == option);
-        }
-
         public string ToPrintFormat(string value) => FieldType.ToPrintFormat(this, value);
 
         public string AdjustValue(string value) => FieldType.AdjustValue(this, value);

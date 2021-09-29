@@ -17,9 +17,9 @@ namespace Domain.Entities
         public Errand Errand { get; init; }
         public Point Point { get; init; }
 
-        public CompletedPointReview Complete(string report, Dictionary<Guid, string> valueDictionary) 
+        public CompletedPointReview Complete(Dictionary<Guid, string> valueDictionary) 
         {
-            var result = new CompletedPointReview(Point, report);
+            var result = new CompletedPointReview(Point);
 
             foreach (var field in Point.Trap.Fields)
             {

@@ -13,9 +13,8 @@ namespace Domain.Entities
 
         }
 
-        public CompletedPointReview(Point point, string report)
+        public CompletedPointReview(Point point)
         {
-            Report = report;
             PointId = point.Id;
             Perimeter = point.Perimeter;
             PointOrder = point.Order;
@@ -24,7 +23,6 @@ namespace Domain.Entities
             PerimeterId = point.PerimeterId;
             TrapId = point.TrapId;
             SupplementId = point.SupplementId;
-            Report = report;
         }
 
         public Guid ErrandId { get; init; }
@@ -41,8 +39,6 @@ namespace Domain.Entities
 
         public Supplement Supplement { get; init; }
         public Guid SupplementId { get; init; }
-
-        public string Report { get; init; }
 
         public IEnumerable<PointReviewRecord> Records => records;
 

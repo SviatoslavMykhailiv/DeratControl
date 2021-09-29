@@ -56,7 +56,7 @@ namespace Application.Errands.Commands.CompleteErrand
                     if (pointData is null)
                         continue;
 
-                    var completedReview = point.Complete(pointData.Report, pointData.GetValueList());
+                    var completedReview = point.Complete(pointData.GetValueList());
 
                     completedPointReviewList.Add(completedReview);
                 }

@@ -6,7 +6,6 @@ namespace Application.Errands.Commands.CompleteErrand
     public class PointReviewDto
     {
         public Guid PointId { get; init; }
-        public string Report { get; init; }
 
         public IReadOnlyCollection<PointReviewRecordDto> Records { get; init; } = new List<PointReviewRecordDto>();
 
