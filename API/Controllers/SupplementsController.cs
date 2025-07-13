@@ -34,7 +34,12 @@ namespace API.Controllers
         [HttpDelete("{supplementId}")]
         public async Task<IActionResult> Delete(
           [FromRoute] Guid supplementId,
-          CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteSupplementCommand(supplementId), cancellationToken));
+          CancellationToken cancellationToken)
+        {
+            await Mediator.Send(new DeleteSupplementCommand(supplementId), cancellationToken);
+
+            return Ok();
+        }
 
         [HttpGet("certificate/{fileName}")]
         [AllowAnonymous]

@@ -21,7 +21,7 @@ namespace Application.Supplements.Commands.DeleteSupplement
 
         public Guid SupplementId { get; }
 
-        public class DeleteSupplementCommandHandler : BaseRequestHandler<DeleteSupplementCommand, Unit>
+        public class DeleteSupplementCommandHandler : BaseRequestHandler<DeleteSupplementCommand>
         {
             private readonly IDeratControlDbContext db;
             private readonly IFileStorage fileStorage;
@@ -39,12 +39,12 @@ namespace Application.Supplements.Commands.DeleteSupplement
                 this.fileStorage = fileStorage;
             }
 
-            protected override async Task<Unit> Handle(RequestContext context, DeleteSupplementCommand request, CancellationToken cancellationToken)
+            protected override async Task Handle(RequestContext context, DeleteSupplementCommand request, CancellationToken cancellationToken)
             {
                 var supplement = await db.Supplements.FindAsync(new object[] { request.SupplementId }, cancellationToken);
 
                 if (supplement is null)
-                    return Unit.Value;
+                    return;
 
                 var inUse = await db.Points.AnyAsync(p => p.SupplementId == request.SupplementId, cancellationToken: cancellationToken);
 
@@ -57,8 +57,6 @@ namespace Application.Supplements.Commands.DeleteSupplement
                 await fileStorage.Remove(supplement.CertificateFilePath);
 
                 cache.Remove($"{nameof(Supplement)}-{context.CurrentUser.UserId}");
-
-                return Unit.Value;
             }
         }
     }

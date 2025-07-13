@@ -36,11 +36,11 @@ namespace Application.Common
             this.currentUserProvider = currentUserProvider;
         }
 
-        public async Task<Unit> Handle(TRequest request, CancellationToken cancellationToken)
+        public async Task Handle(TRequest request, CancellationToken cancellationToken)
         {
-            return await Handle(new RequestContext(currentUserProvider.User, currentDateService.CurrentDate), request, cancellationToken);
+            await Handle(new RequestContext(currentUserProvider.User, currentDateService.CurrentDate), request, cancellationToken);
         }
 
-        protected abstract Task<Unit> Handle(RequestContext context, TRequest request, CancellationToken cancellationToken);
+        protected abstract Task Handle(RequestContext context, TRequest request, CancellationToken cancellationToken);
     }
 }

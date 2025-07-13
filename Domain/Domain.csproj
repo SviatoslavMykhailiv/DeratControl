@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
 
-  <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
-  </ItemGroup>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.2.0" />
+	</ItemGroup>
 
 </Project>

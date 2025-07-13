@@ -40,6 +40,11 @@ namespace API.Controllers
         [HttpDelete("{facilityId}")]
         public async Task<IActionResult> Delete(
           [FromRoute] Guid facilityId,
-          CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteFacilityCommand(facilityId), cancellationToken));
+          CancellationToken cancellationToken)
+        {
+            await Mediator.Send(new DeleteFacilityCommand(facilityId), cancellationToken);
+
+            return Ok();
+        }
     }
 }

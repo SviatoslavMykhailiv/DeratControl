@@ -11,13 +11,13 @@ namespace Infrastructure.Services
 
         public byte[] Generate(string value)
         {
+
             var qrCodeData = qRCodeGenerator.CreateQrCode(value, QRCodeGenerator.ECCLevel.Q);
-            var qrCode = new QRCode(qrCodeData);
+            var qrCode = new PngByteQRCode(qrCodeData);
             var qrCodeImage = qrCode.GetGraphic(20);
 
-            using var memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream(qrCodeImage);
 
-            qrCodeImage.Save(memoryStream, ImageFormat.Png);
             return memoryStream.ToArray();
         }
     }

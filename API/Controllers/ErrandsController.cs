@@ -52,12 +52,22 @@ namespace API.Controllers
         [HttpPost("complete")]
         public async Task<IActionResult> Complete(
           [FromBody] CompleteErrandCommand command,
-          CancellationToken cancellationToken = default) => Ok(await Mediator.Send(command, cancellationToken));
+          CancellationToken cancellationToken = default)
+        {
+            await Mediator.Send(command, cancellationToken);
+
+            return Ok();
+        }
 
         [Authorize(AuthenticationSchemes = "Bearer", Roles = "PROVIDER")]
         [HttpDelete("{errandId}")]
         public async Task<IActionResult> Delete(
           [FromRoute] Guid errandId,
-          CancellationToken cancellationToken = default) => Ok(await Mediator.Send(new DeleteErrandCommand(errandId), cancellationToken));
+          CancellationToken cancellationToken = default)
+        {
+            await Mediator.Send(new DeleteErrandCommand(errandId), cancellationToken);
+
+            return Ok();
+        }
     }
 }

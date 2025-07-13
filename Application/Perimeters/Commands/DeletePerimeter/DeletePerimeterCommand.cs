@@ -26,12 +26,12 @@ namespace Application.Perimeters.Commands.DeletePerimeter
                 this.db = db;
             }
 
-            public async Task<Unit> Handle(DeletePerimeterCommand request, CancellationToken cancellationToken)
+            public async Task Handle(DeletePerimeterCommand request, CancellationToken cancellationToken)
             {
                 var perimeter = await db.Perimeters.FindAsync(new object[] { request.PerimeterId }, cancellationToken);
 
                 if (perimeter is null)
-                    return Unit.Value;
+                    return;
 
                 var isUsed = await db
                   .Errands
@@ -43,8 +43,6 @@ namespace Application.Perimeters.Commands.DeletePerimeter
                 db.Perimeters.Remove(perimeter);
 
                 await db.SaveChangesAsync(cancellationToken);
-
-                return Unit.Value;
             }
         }
     }

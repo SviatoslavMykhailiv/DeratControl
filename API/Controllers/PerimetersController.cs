@@ -39,7 +39,12 @@ namespace API.Controllers
         [HttpDelete("{perimeterId}")]
         public async Task<IActionResult> Delete(
           [FromRoute] Guid perimeterId,
-          CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeletePerimeterCommand(perimeterId), cancellationToken));
+          CancellationToken cancellationToken)
+        {
+            await Mediator.Send(new DeletePerimeterCommand(perimeterId), cancellationToken);
+
+            return Ok();
+        }
 
         [HttpGet("schemes/{fileName}")]
         [AllowAnonymous]

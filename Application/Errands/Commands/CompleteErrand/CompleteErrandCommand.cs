@@ -22,7 +22,7 @@ namespace Application.Errands.Commands.CompleteErrand
         public string Signature { get; init; }
         public IReadOnlyCollection<PointReviewDto> Points { get; init; } = new List<PointReviewDto>();
 
-        public class CompleteErrandCommandHandler : BaseRequestHandler<CompleteErrandCommand, Unit>
+        public class CompleteErrandCommandHandler : BaseRequestHandler<CompleteErrandCommand>
         {
             private readonly IDeratControlDbContext db;
             private readonly ICurrentDateService currentDateService;
@@ -39,7 +39,7 @@ namespace Application.Errands.Commands.CompleteErrand
                 this.fileStorage = fileStorage;
             }
 
-            protected override async Task<Unit> Handle(RequestContext context, CompleteErrandCommand request, CancellationToken cancellationToken)
+            protected override async Task Handle(RequestContext context, CompleteErrandCommand request, CancellationToken cancellationToken)
             {
                 var errand = await GetErrand(request.ErrandId, context.CurrentUser.UserId) ?? throw new NotFoundException("Завдання не знайдено.");
                 var incomingPointList = request.Points.ToDictionary(p => p.PointId);
@@ -75,8 +75,6 @@ namespace Application.Errands.Commands.CompleteErrand
                 db.CompletedErrands.Add(completedErrand);
 
                 await db.SaveChangesAsync(cancellationToken);
-
-                return Unit.Value;
             }
 
             private Task<Errand> GetErrand(Guid errandId, Guid employeeId)

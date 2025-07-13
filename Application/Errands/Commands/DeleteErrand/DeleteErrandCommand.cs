@@ -19,7 +19,7 @@ namespace Application.Errands.Commands.DeleteErrand
 
         public Guid ErrandId { get; }
 
-        public class DeleteErrandCommandHandler : BaseRequestHandler<DeleteErrandCommand, Unit>
+        public class DeleteErrandCommandHandler : BaseRequestHandler<DeleteErrandCommand>
         {
             private readonly IDeratControlDbContext db;
 
@@ -31,17 +31,15 @@ namespace Application.Errands.Commands.DeleteErrand
                 this.db = db;
             }
 
-            protected override async Task<Unit> Handle(RequestContext context, DeleteErrandCommand request, CancellationToken cancellationToken)
+            protected override async Task Handle(RequestContext context, DeleteErrandCommand request, CancellationToken cancellationToken)
             {
                 var errand = await db.Errands.FirstOrDefaultAsync(e => e.Id == request.ErrandId, cancellationToken);
 
                 if (errand is null)
-                    return Unit.Value;
+                    return;
 
                 db.Errands.Remove(errand);
-                await db.SaveChangesAsync(cancellationToken);
-
-                return Unit.Value;
+                await db.SaveChangesAsync(cancellationToken);                
             }
         }
     }

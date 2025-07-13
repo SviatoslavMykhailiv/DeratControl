@@ -21,7 +21,7 @@ namespace Application.Traps.Commands.DeleteTrap
 
         public Guid TrapId { get; }
 
-        public class DeleteTrapCommandHandler : BaseRequestHandler<DeleteTrapCommand, Unit>
+        public class DeleteTrapCommandHandler : BaseRequestHandler<DeleteTrapCommand>
         {
             private readonly IDeratControlDbContext db;
             private readonly IMemoryCache cache;
@@ -36,12 +36,12 @@ namespace Application.Traps.Commands.DeleteTrap
                 this.db = db;
             }
 
-            protected override async Task<Unit> Handle(RequestContext context, DeleteTrapCommand request, CancellationToken cancellationToken)
+            protected override async Task Handle(RequestContext context, DeleteTrapCommand request, CancellationToken cancellationToken)
             {
                 var trap = await db.Traps.FindAsync(new object[] { request.TrapId }, cancellationToken);
 
                 if (trap is null)
-                    return Unit.Value;
+                    return;
 
                 var inUse = await db.Points.AnyAsync(p => p.TrapId == request.TrapId, cancellationToken: cancellationToken);
 
@@ -54,7 +54,7 @@ namespace Application.Traps.Commands.DeleteTrap
 
                 cache.Remove($"{nameof(Trap)}-{context.CurrentUser.UserId}");
 
-                return Unit.Value;
+                return;
             }
         }
     }

@@ -33,6 +33,11 @@ namespace API.Controllers
         [HttpDelete("{trapId}")]
         public async Task<IActionResult> Delete(
           [FromRoute] Guid trapId,
-          CancellationToken cancellationToken) => Ok(await Mediator.Send(new DeleteTrapCommand(trapId), cancellationToken));
+          CancellationToken cancellationToken)
+        {
+            await Mediator.Send(new DeleteTrapCommand(trapId), cancellationToken);
+
+            return Ok();
+        }
     }
 }

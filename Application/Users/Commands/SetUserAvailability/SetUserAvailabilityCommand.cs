@@ -30,7 +30,7 @@ namespace Application.Users.Commands.SetUserAvailability
                 this.db = db;
             }
 
-            public async Task<Unit> Handle(SetUserAvailabilityCommand request, CancellationToken cancellationToken)
+            public async Task Handle(SetUserAvailabilityCommand request, CancellationToken cancellationToken)
             {
                 var errandsExist = await db.Errands.AnyAsync(e => e.EmployeeId == request.UserId, cancellationToken: cancellationToken);
 
@@ -38,7 +38,6 @@ namespace Application.Users.Commands.SetUserAvailability
                     throw new BadRequestException("У даного працівника існують невиконані завдання.");
 
                 await userManagerService.SetUserAvailability(request.UserId, request.Available);
-                return Unit.Value;
             }
         }
     }

@@ -29,7 +29,12 @@ namespace API.Controllers
 
 
         [HttpPost("availability")]
-        public async Task<IActionResult> SetUserActive([FromBody] SetUserAvailabilityCommand command) => Ok(await Mediator.Send(command));
+        public async Task<IActionResult> SetUserActive([FromBody] SetUserAvailabilityCommand command)
+        {
+            await Mediator.Send(command);
+
+            return Ok();
+        }
 
         [HttpGet("employees/available")]
         public async Task<IActionResult> GetAvailableEmployees([FromQuery] GetAvailableEmployeeListQuery command) => Ok(await Mediator.Send(command));

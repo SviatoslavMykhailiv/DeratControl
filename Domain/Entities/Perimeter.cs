@@ -1,8 +1,9 @@
 ﻿using Domain.Common;
+using ImageMagick;
+using ImageMagick.Drawing;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
@@ -95,38 +96,48 @@ namespace Domain.Entities
 
         public byte[] GeneratePerimeterImage(byte[] image)
         {
-            Bitmap bitmap;
+            MagickImage magickImage;
 
-            if(image.Length == 0)
+            if (image.Length == 0)
             {
-                bitmap = new Bitmap(1000, 1000);
-            } 
+                // Create a blank white image 1000x1000
+                magickImage = new MagickImage(MagickColors.White, 1000, 1000);
+            }
             else
             {
-                using var imageStream = new MemoryStream(image);
-                bitmap = new Bitmap(imageStream);
+                magickImage = new MagickImage(image);
             }
 
-            var graphics = Graphics.FromImage(bitmap);
-            var linePen = new Pen(Brushes.Gray);
-            var font = new Font(new FontFamily("Times New Roman"), 20, FontStyle.Regular, GraphicsUnit.Pixel);
+            var drawables = new Drawables();
+            var fontSize = 20;
+            var fontFamily = "Times New Roman";
 
             foreach (var point in Points)
             {
-                var brush = new SolidBrush(ColorTranslator.FromHtml(point.Trap.Color));
-                graphics.FillEllipse(brush, point.LeftLoc - Point.RADIUS / 2, point.TopLoc - Point.RADIUS / 2, Point.RADIUS, Point.RADIUS);
-                graphics.DrawString(point.Order.ToString(), font, Brushes.Black, new PointF(point.LeftLoc + Point.RADIUS / 2, point.TopLoc - Point.RADIUS));
+                var color = new MagickColor(point.Trap.Color); // "#RRGGBB"
+                var radius = Point.RADIUS;
+                var x = point.LeftLoc;
+                var y = point.TopLoc;
+
+                // Draw filled circle
+                drawables.FillColor(color)
+                         .StrokeColor(MagickColors.Transparent)
+                         .Circle(x, y, x + radius / 2.0, y);
+
+                // Draw order text
+                drawables.Font(fontFamily)
+                         .FontPointSize(fontSize)
+                         .FillColor(MagickColors.Black)
+                         .TextAlignment(TextAlignment.Left)
+                         .Text(x + radius / 2.0, y - radius, point.Order.ToString());
             }
 
-            using var memoryStream = new MemoryStream();
-            var encoder = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Png.Guid);
+            drawables.Draw(magickImage);
 
-            using var encodingParams = new EncoderParameters(1);
-            encodingParams.Param[0] = new EncoderParameter(Encoder.Quality, 85L);
+            // Set format and quality (PNG doesn't use quality, but for consistency we mimic it)
+            magickImage.Format = MagickFormat.Png;
 
-            bitmap.Save(memoryStream, encoder, encodingParams);
-
-            return memoryStream.ToArray();
+            return magickImage.ToByteArray();
         }
     }
 }

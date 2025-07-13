@@ -26,12 +26,12 @@ namespace Application.Facilities.Commands.DeleteFacility
                 this.db = db;
             }
 
-            public async Task<Unit> Handle(DeleteFacilityCommand request, CancellationToken cancellationToken)
+            public async Task Handle(DeleteFacilityCommand request, CancellationToken cancellationToken)
             {
                 var facility = await db.Facilities.FindAsync(new object[] { request.FacilityId }, cancellationToken);
 
                 if (facility is null)
-                    return Unit.Value;
+                    return;
 
                 var isUsed = await db
                   .Errands
@@ -43,8 +43,6 @@ namespace Application.Facilities.Commands.DeleteFacility
                 db.Facilities.Remove(facility);
 
                 await db.SaveChangesAsync(cancellationToken);
-
-                return Unit.Value;
             }
         }
     }
