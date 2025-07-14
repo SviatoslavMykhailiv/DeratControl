@@ -23,10 +23,8 @@ namespace Infrastructure.Services
 
         public async Task Seed()
         {
-
             if (!await context.Roles.AnyAsync())
             {
-
                 await roleManager.CreateAsync(new ApplicationRole { Name = "PROVIDER", NormalizedName = "PROVIDER", ConcurrencyStamp = Guid.NewGuid().ToString() });
                 await roleManager.CreateAsync(new ApplicationRole { Name = "CUSTOMER", NormalizedName = "CUSTOMER", ConcurrencyStamp = Guid.NewGuid().ToString() });
                 await roleManager.CreateAsync(new ApplicationRole { Name = "EMPLOYEE", NormalizedName = "EMPLOYEE", ConcurrencyStamp = Guid.NewGuid().ToString() });

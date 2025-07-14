@@ -1,48 +1,73 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using Serilog.Formatting.Compact;
-using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Globalization;
+using API.Filters;
+using Application;
+using Infrastructure;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
-namespace API
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers(config =>
 {
-    public class Program
+    config.Filters.Add(new ApiExceptionFilter());
+});
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddMemoryCache();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Default", builder =>
     {
-        public static void Main(string[] args)
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel
-                .Warning()
-                .WriteTo
-                .Debug(new RenderedCompactJsonFormatter())
-                .WriteTo.File("logs/logs.txt", rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-            try
-            {
-                Log.Information("Starting host.");
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch(Exception ex) 
-            {
-                Log.Fatal(ex, "Host terminated.");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
+        builder.WithOrigins("http://localhost:4200");
+        builder.AllowAnyMethod();
+        builder.AllowAnyHeader();
+    });
+});
 
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseUrls("http://0.0.0.0:5000");
-                    webBuilder.UseStartup<Startup>();
-                });
-        }
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new List<CultureInfo>
+    {
+        new("en-US")
+    };
 
-    }
-}
+    options.DefaultRequestCulture = new RequestCulture("en-US");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
+
+builder.Services.AddHealthChecks();
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+var app = builder.Build();
+
+app.MapHealthChecks("status");
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<DeratControlDbContext>();
+var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+
+await db.Database.MigrateAsync();
+
+await seeder.Seed();
+
+var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>();
+app.UseRequestLocalization(localizationOptions.Value);
+
+app.UseCors("Default");
+app.UseRouting();
+
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
