@@ -35,7 +35,7 @@ namespace Infrastructure.Services
                 await userManagerService.SaveUser(null, new UserDto
                 {
                     UserName = "admin",
-                    Password = "V@lr1n0k",
+                    Password = "admin",
                     FirstName = "admin",
                     LastName = "admin",
                     PhoneNumber = "+380638660938",
