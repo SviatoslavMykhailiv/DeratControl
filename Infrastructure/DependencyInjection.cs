@@ -48,6 +48,8 @@ public static class DependencyInjection
                     };
                 });
 
+        services.AddAuthorization();
+
         services.AddIdentity<ApplicationUser, ApplicationRole>()
           .AddEntityFrameworkStores<DeratControlDbContext>();
 
@@ -55,7 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IUserManagerService, UserManagerService>();
         services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
 
-        services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+        services.AddSingleton<IConverter>(new SynchronizedConverter(new PdfTools()));
         services.AddScoped<IReportBuilder, HTMLReportBuilder>();
 
         services.AddOptions<EncryptionOptions>().Configure(options =>
