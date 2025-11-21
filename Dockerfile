@@ -29,4 +29,8 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 RUN apt-get update && apt-get install -y curl
+RUN apt-get install -y apt-utils
+RUN apt-get install -y libgdiplus
+RUN apt-get install -y libc6-dev
+RUN ln -s /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 ENTRYPOINT ["dotnet", "API.dll"]

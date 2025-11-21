@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 
@@ -13,12 +14,14 @@ namespace Infrastructure.Services
         private readonly DeratControlDbContext context;
         private readonly IUserManagerService userManagerService;
         private readonly RoleManager<ApplicationRole> roleManager;
+        private readonly IConfiguration configuration;
 
-        public DataSeeder(DeratControlDbContext context, IUserManagerService userManagerService, RoleManager<ApplicationRole> roleManager)
+        public DataSeeder(DeratControlDbContext context, IUserManagerService userManagerService, RoleManager<ApplicationRole> roleManager, IConfiguration configuration)
         {
             this.context = context;
             this.userManagerService = userManagerService;
             this.roleManager = roleManager;
+            this.configuration = configuration;
         }
 
         public async Task Seed()
@@ -35,7 +38,7 @@ namespace Infrastructure.Services
                 await userManagerService.SaveUser(null, new UserDto
                 {
                     UserName = "admin",
-                    Password = "admin",
+                    Password = configuration["Security:AdminPassword"],
                     FirstName = "admin",
                     LastName = "admin",
                     PhoneNumber = "+380638660938",
